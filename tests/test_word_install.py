@@ -69,8 +69,8 @@ def run():
             installer.stop(directory)  # repeated stop is harmless
         finally:
             if child.poll() is None:
-                installer.stop(directory)
-                child.wait(timeout=10)
+                (directory / "stop-request").touch()
+                child.communicate(timeout=10)
 
         # An occupied companion port is rejected before a second process is launched.
         with patch.object(installer.socket, "socket") as socket_factory:
@@ -108,6 +108,18 @@ def run():
             startup.assert_called_once_with(directory, False)
         assert (directory / "vocabulary.sqlite3").read_text() == "retained"
         assert not (directory / "server.py").exists()
+
+        (directory / "dist/word-manifest.xml").write_text("manifest")
+        with patch.object(installer, "office_tool", side_effect=RuntimeError("Node unavailable")), \
+             patch.object(installer, "login_startup") as startup, patch.object(installer, "stop") as stop:
+            try:
+                installer.uninstall(directory)
+                raise AssertionError("unregister failure hidden")
+            except RuntimeError:
+                pass
+            startup.assert_called_once_with(directory, False)
+            stop.assert_called_once_with(directory)
+            assert (directory / "dist/word-manifest.xml").exists()
 
         # Setup copies the complete payload; failed updates restore prior files and state.
         with patch.object(installer, "office_tool") as office, \

@@ -31,8 +31,8 @@ def instance_lock(directory, name="companion.lock"):
     """Hold one OS-released lock for the supervisor's full lifetime."""
     directory.mkdir(parents=True, exist_ok=True)
     with (directory / name).open("a+b") as lock:
-        lock.seek(0)
-        if not lock.read(1):
+        # Windows byte locks also deny reads by other handles. Inspect size only.
+        if os.fstat(lock.fileno()).st_size == 0:
             lock.write(b"0")
             lock.flush()
         lock.seek(0)
@@ -270,12 +270,13 @@ def install(directory):
 
 
 def uninstall(directory):
-    # Unregister before deleting files so failed registration cleanup is recoverable.
+    # Always stop startup/server, even if npm or Office registration is unavailable.
+    # Retain the payload on unregister failure so cleanup can be retried.
+    login_startup(directory, False)
+    stop(directory)
     manifest = directory / "dist/word-manifest.xml"
     if manifest.is_file():
         office_tool("office-addin-dev-settings@4.0.1", "unregister", manifest)
-    login_startup(directory, False)
-    stop(directory)
     # Keep the manager available while this process is running, especially on Windows.
     for name in PAYLOAD:
         if name != "tools/install_word.py":
