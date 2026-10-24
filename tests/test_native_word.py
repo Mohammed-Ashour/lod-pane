@@ -131,6 +131,24 @@ def run():
             stop.assert_not_called()
         assert (cancelled / "native-installed").read_text() == "existing installation"
 
+        # Legacy markers cannot make a newly installed build skip folder consent.
+        (cancelled / "certificates").mkdir()
+        (cancelled / "certificates/localhost.crt").write_bytes((folder / "localhost.crt").read_bytes())
+        scope = MagicMock()
+        with patch.object(native.sys, "argv", ["native", "--no-dialog", "--install-dir", str(cancelled)]), \
+             patch.object(native, "manifest_access", return_value=scope), \
+             patch.object(native, "install") as install:
+            assert native.main() == 0
+            install.assert_called_once_with(cancelled.resolve(), scope.__enter__.return_value)
+
+        # Failure reports identify the running source build and exact failing phase.
+        with patch.object(native, "build_info", return_value={"commit_sha": "a" * 40, "bundle_version": "2988.1.2"}):
+            native.log_setup(cancelled, "failed", "request Word folder access", PermissionError("blocked"), "trace details")
+        diagnostic = (cancelled / "companion.log").read_text()
+        assert "build=aaaaaaaaaaaa / 2988.1.2 event=failed" in diagnostic
+        assert "phase=request Word folder access" in diagnostic
+        assert "executable=" in diagnostic and "trace details" in diagnostic
+
     print("PASS: unique native CA/leaf generation, CA private-key disposal, reuse, manifest ownership, and frozen lifecycle/TLS paths.")
 
 

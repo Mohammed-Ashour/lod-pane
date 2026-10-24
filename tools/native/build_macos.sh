@@ -3,6 +3,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
+test -f dist/native-build-info.json || {
+  echo "Missing dist/native-build-info.json; run tools/native/build_info.py first." >&2
+  exit 1
+}
+
 python -m pip install pyinstaller==6.16.0 cryptography==43.0.3
 mkdir -p dist/native-macos
 swiftc -target arm64-apple-macos12.0 -module-cache-path dist/native-swift-cache tools/native/word_folder_access.swift -o dist/native-macos/word-folder-access
@@ -24,16 +29,22 @@ python -m PyInstaller \
   --add-binary "dist/native-macos/word-folder-access:macos" \
   --add-data "word:word" \
   --add-data "SETUP.md:." \
+  --add-data "dist/native-build-info.json:." \
   --add-data "dist/word-manifest.xml:dist" \
   tools/native_word.py
 
 python - <<'PY'
 from pathlib import Path
+import json
 import plistlib
 
 info = Path("dist/LOD-pane-Word.app/Contents/Info.plist")
+build = json.loads(Path("dist/native-build-info.json").read_text(encoding="utf-8"))
 with info.open("rb") as source:
     values = plistlib.load(source)
+values["CFBundleVersion"] = build["bundle_version"]
+values["CFBundleShortVersionString"] = build["marketing_version"]
+values["LODPaneBuildCommit"] = build["commit_sha"]
 values["NSAppDataUsageDescription"] = (
     "LOD pane Word needs access to the Word add-in folder you select to install "
     "or remove its manifest."
@@ -49,12 +60,11 @@ if ! dist/LOD-pane-Word.app/Contents/MacOS/LOD-pane-Word --self-test --no-dialog
   exit 1
 fi
 
-pkgbuild \
-  --component dist/LOD-pane-Word.app \
-  --install-location /Applications \
-  --identifier org.lodpane.word.app \
-  --version 0.7.0 \
-  dist/lod-pane-word-macos-arm64.pkg
+python tools/native/package_macos.py \
+  --app dist/LOD-pane-Word.app \
+  --output dist/lod-pane-word-macos-arm64.pkg \
+  --package-identifier org.lodpane.word.app \
+  --bundle-identifier org.lodpane.word.app
 
 python tests/test_native_libreoffice.py
 python -m PyInstaller \
@@ -68,15 +78,30 @@ python -m PyInstaller \
   --paths tools \
   --workpath dist/native-build-libreoffice \
   --add-data "dist/lod-pane.oxt:dist" \
+  --add-data "dist/native-build-info.json:." \
   tools/native_libreoffice.py
 
+python - <<'PY'
+from pathlib import Path
+import json
+import plistlib
+
+info = Path("dist/LOD-pane-LibreOffice.app/Contents/Info.plist")
+build = json.loads(Path("dist/native-build-info.json").read_text(encoding="utf-8"))
+with info.open("rb") as source:
+    values = plistlib.load(source)
+values["CFBundleVersion"] = build["bundle_version"]
+values["CFBundleShortVersionString"] = build["marketing_version"]
+values["LODPaneBuildCommit"] = build["commit_sha"]
+with info.open("wb") as target:
+    plistlib.dump(values, target)
+PY
 python tools/native/copy_licenses.py dist/LOD-pane-LibreOffice.app/Contents/Resources
 codesign --force --deep --sign - dist/LOD-pane-LibreOffice.app
 dist/LOD-pane-LibreOffice.app/Contents/MacOS/LOD-pane-LibreOffice --self-test --no-dialog
 
-pkgbuild \
-  --component dist/LOD-pane-LibreOffice.app \
-  --install-location /Applications \
-  --identifier org.lodpane.libreoffice.app \
-  --version 0.7.0 \
-  dist/lod-pane-libreoffice-macos-arm64.pkg
+python tools/native/package_macos.py \
+  --app dist/LOD-pane-LibreOffice.app \
+  --output dist/lod-pane-libreoffice-macos-arm64.pkg \
+  --package-identifier org.lodpane.libreoffice.app \
+  --bundle-identifier org.lodpane.libreoffice.app

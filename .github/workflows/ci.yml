@@ -40,6 +40,8 @@ jobs:
           tools/native_word.py
           tests/test_native_word.py
           tools/native_libreoffice.py
+          tools/native/build_info.py
+          tools/native/package_macos.py
           tests/test_native_libreoffice.py
 
       - name: Check JavaScript syntax

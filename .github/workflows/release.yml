@@ -38,7 +38,9 @@ jobs:
           node-version: 22
 
       - name: Build packages
-        run: python tools/build.py
+        run: |
+          python tools/build.py
+          python tools/native/build_info.py
 
       - name: Test Word installation packages
         run: python tests/test_word_install.py
@@ -83,7 +85,9 @@ jobs:
           node-version: 22
 
       - name: Build packages
-        run: python tools/build.py
+        run: |
+          python tools/build.py
+          python tools/native/build_info.py
 
       - name: Test Word installation packages
         run: python tests/test_word_install.py
@@ -98,7 +102,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Installing native build dependencies failed with exit code $LASTEXITCODE." }
           python tests/test_native_word.py
           if ($LASTEXITCODE -ne 0) { throw "Native Word tests failed with exit code $LASTEXITCODE." }
-          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOD-pane-Word --paths . --paths tools --workpath dist/native-build --copy-metadata cryptography --copy-metadata cffi --add-data "word;word" --add-data "SETUP.md;." --add-data "dist/word-manifest.xml;dist" tools/native_word.py
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOD-pane-Word --paths . --paths tools --workpath dist/native-build --copy-metadata cryptography --copy-metadata cffi --add-data "word;word" --add-data "SETUP.md;." --add-data "dist/native-build-info.json;." --add-data "dist/word-manifest.xml;dist" tools/native_word.py
           if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed with exit code $LASTEXITCODE." }
           python tools/native/copy_licenses.py dist/LOD-pane-Word
           if ($LASTEXITCODE -ne 0) { throw "Copying third-party license notices failed with exit code $LASTEXITCODE." }
@@ -128,7 +132,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE." }
           python tests/test_native_libreoffice.py
           if ($LASTEXITCODE -ne 0) { throw "Native LibreOffice tests failed with exit code $LASTEXITCODE." }
-          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOD-pane-LibreOffice --paths . --paths tools --workpath dist/native-build-libreoffice --add-data "dist/lod-pane.oxt;dist" tools/native_libreoffice.py
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOD-pane-LibreOffice --paths . --paths tools --workpath dist/native-build-libreoffice --add-data "dist/lod-pane.oxt;dist" --add-data "dist/native-build-info.json;." tools/native_libreoffice.py
           if ($LASTEXITCODE -ne 0) { throw "LibreOffice PyInstaller build failed with exit code $LASTEXITCODE." }
           python tools/native/copy_licenses.py dist/LOD-pane-LibreOffice
           if ($LASTEXITCODE -ne 0) { throw "Copying LibreOffice license notices failed with exit code $LASTEXITCODE." }

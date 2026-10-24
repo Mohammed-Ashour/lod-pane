@@ -13,6 +13,7 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory, gettempdir
 import time
+import traceback
 from urllib.request import urlopen
 
 from cryptography import x509
@@ -25,6 +26,46 @@ import server
 
 ADDIN_ID = "ad0b38c2-5f64-4d1e-9978-a1ea27d53814"
 DEVELOPER_KEY = r"Software\Microsoft\Office\16.0\WEF\Developer"
+
+
+def build_info():
+    try:
+        value = json.loads((resources() / "native-build-info.json").read_text(encoding="utf-8"))
+        if isinstance(value, dict):
+            return value
+    except (OSError, ValueError):
+        pass
+    return {"commit_sha": "unversioned", "bundle_version": "unknown"}
+
+
+def build_label():
+    info = build_info()
+    return str(info.get("commit_sha", "unversioned"))[:12] + " / " + str(info.get("bundle_version", "unknown"))
+
+
+def log_setup(directory, event, phase, error=None, stack=None):
+    lines = [datetime.now(timezone.utc).isoformat() + " build=" + build_label() + " event=" + event,
+             "phase=" + phase, "executable=" + sys.executable,
+             "frozen=" + str(getattr(sys, "frozen", False))]
+    if error is not None:
+        lines.append("error=" + str(error))
+    if stack:
+        lines.append(stack.rstrip())
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        with (directory / "companion.log").open("a", encoding="utf-8") as log:
+            log.write("\n".join(lines) + "\n\n")
+    except OSError:
+        if sys.stderr is not None:
+            print("\n".join(lines), file=sys.stderr)
+
+
+@contextmanager
+def setup_step(label):
+    try:
+        yield
+    except Exception as error:
+        raise RuntimeError(label + ": " + str(error)) from error
 
 
 class MacManifestAccess:
@@ -282,7 +323,8 @@ def install(directory, access=None):
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     marker = directory / "native-installed"
     prior_marker = marker.read_bytes() if marker.is_file() else None
-    prior_registration = registration_snapshot(access)
+    with setup_step("snapshot Word manifest"):
+        prior_registration = registration_snapshot(access)
     prior_manifest = (directory / "word-manifest.xml").read_bytes() if (directory / "word-manifest.xml").is_file() else None
     prior_certificates = {name: (directory / "certificates" / name).read_bytes()
                           for name in ("ca.crt", "localhost.crt", "localhost.key")
@@ -294,12 +336,17 @@ def install(directory, access=None):
     try:
         manager.stop(directory)
         manager.login_startup(directory, False)
-        certificates(directory)
-        trust_ca(directory / "certificates/ca.crt", True)
+        with setup_step("prepare localhost certificates"):
+            certificates(directory)
+        with setup_step("trust localhost certificate"):
+            trust_ca(directory / "certificates/ca.crt", True)
         trusted = True
-        register_manifest(directory, True, access)
-        manager.login_startup(directory, True)
-        manager.start(directory)
+        with setup_step("register Word manifest"):
+            register_manifest(directory, True, access)
+        with setup_step("enable login startup"):
+            manager.login_startup(directory, True)
+        with setup_step("start HTTPS companion"):
+            manager.start(directory)
     except Exception:
         manager.login_startup(directory, False)
         manager.stop(directory)
@@ -324,7 +371,7 @@ def install(directory, access=None):
         if prior_marker is not None:
             marker.write_bytes(prior_marker)
         raise
-    marker.write_text(sys.executable, encoding="utf-8")
+    marker.write_text(json.dumps({"executable": sys.executable, "commit_sha": build_info().get("commit_sha")}), encoding="utf-8")
 
 
 def uninstall(directory, access=None):
@@ -347,6 +394,8 @@ def serve(directory):
 def self_test():
     """Exercise the frozen runtime and real TLS without changing OS trust/settings."""
     assert ssl.create_default_context().cert_store_stats()["x509_ca"] > 0, "No trusted roots for LOD HTTPS"
+    commit = str(build_info().get("commit_sha", ""))
+    assert len(commit) == 40 and all(c in "0123456789abcdef" for c in commit), "Missing native build identity"
     if sys.platform == "darwin":
         subprocess.run([str(resources() / "macos/word-folder-access"), "--self-test"], check=True, timeout=15)
     with TemporaryDirectory(prefix="lod-native-package-") as temporary:
@@ -384,7 +433,7 @@ def self_test():
 def main():
     configure_tls()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", nargs="?", choices=("install", "start", "stop", "status", "uninstall", "run", "serve"))
+    parser.add_argument("action", nargs="?", choices=("install", "start", "stop", "status", "uninstall", "run", "serve", "version"))
     parser.add_argument("--install-dir", type=Path, default=manager.default_directory())
     parser.add_argument("--no-dialog", action="store_true")
     parser.add_argument("--self-test", action="store_true")
@@ -393,17 +442,26 @@ def main():
     if args.self_test:
         directory = Path(gettempdir()) / "lod-native-smoke-diagnostics"
     silent = args.no_dialog or args.action in ("run", "serve") or args.self_test
+    phase = "initialization"
+    log_setup(directory, "begin", args.action or "launch")
     try:
         if args.self_test:
             return self_test()
         action = args.action
+        if action == "version":
+            if not silent:
+                dialog("LOD pane Word build " + build_label() + "\nExecutable: " + sys.executable)
+            elif sys.stdout is not None:
+                print(build_label())
+            return 0
         if action is None:
             needs_setup = not (directory / "native-installed").is_file()
             if not needs_setup:
                 try:
                     leaf = x509.load_pem_x509_certificate((directory / "certificates/localhost.crt").read_bytes())
                     needs_setup = leaf.not_valid_after_utc < datetime.now(timezone.utc) + timedelta(days=7)
-                    needs_setup |= (directory / "native-installed").read_text(encoding="utf-8") != sys.executable
+                    installed = json.loads((directory / "native-installed").read_text(encoding="utf-8"))
+                    needs_setup |= not isinstance(installed, dict) or installed.get("executable") != sys.executable or installed.get("commit_sha") != build_info().get("commit_sha")
                 except (OSError, ValueError):
                     needs_setup = True
             if needs_setup:
@@ -421,14 +479,18 @@ def main():
                 if not acquired:
                     raise RuntimeError("Another setup/start/stop operation is in progress.")
                 if action == "install":
-                    if not silent and not dialog("Install LOD pane for Word?\n\nThis trusts a certificate for the local HTTPS companion, registers the Word add-in, and starts a background companion at sign-in. Your vocabulary stays local. Close Word before continuing.", question=True):
+                    if not silent and not dialog("Install LOD pane for Word?\nBuild " + build_label() + "\n\nThis trusts a certificate for the local HTTPS companion, registers the Word add-in, and starts a background companion at sign-in. Your vocabulary stays local. Close Word before continuing.", question=True):
                         return 1
+                    phase = "request Word folder access"
                     with manifest_access() as access:
+                        phase = "install Word integration"
                         install(directory, access)
                 elif action == "uninstall":
                     if not silent and not dialog("Remove Word registration, login startup and this companion's local certificate trust? Vocabulary is retained.", question=True):
                         return 1
+                    phase = "request Word folder access for removal"
                     with manifest_access() as access:
+                        phase = "remove Word integration"
                         uninstall(directory, access)
                 elif action == "status":
                     if not manager.running(directory):
@@ -437,14 +499,13 @@ def main():
                 else:
                     {"start": manager.start, "stop": manager.stop}[action](directory)
             if not silent:
-                dialog("LOD pane: " + action + " completed.\nRestart Word after setup, then open Home > Add-ins > LOD pane.\nData and logs: " + str(directory))
+                dialog("LOD pane: " + action + " completed.\nBuild " + build_label() + "\nRestart Word after setup, then open Home > Add-ins > LOD pane.\nData and logs: " + str(directory))
+            log_setup(directory, "completed", action)
         return 0
     except Exception as error:
-        directory.mkdir(parents=True, exist_ok=True)
-        with (directory / "companion.log").open("a", encoding="utf-8") as log:
-            log.write(str(error) + "\n")
+        log_setup(directory, "failed", phase, error, traceback.format_exc())
         if not silent:
-            dialog("LOD pane could not complete setup.\n" + str(error) + "\nDetails: " + str(directory / "companion.log"))
+            dialog("LOD pane could not complete setup.\nBuild " + build_label() + "\nStep: " + phase + "\n" + str(error) + "\nDetails: " + str(directory / "companion.log"))
         return 1
 
 

@@ -119,6 +119,19 @@ If it does not exist, open Word once, quit Word, and retry setup. Removal asks
 for the same scoped permission. Cancelling leaves the current installation
 unchanged.
 
+If reinstalling still shows an old error and no **Allow Access** picker, dismiss
+the old app's dialogs and launch a fresh instance of the installed copy:
+
+```sh
+open -n /Applications/LOD-pane-Word.app
+```
+
+Current builds show a commit/build identifier in setup and error dialogs.
+`companion.log` includes timestamps, that build identifier, the executable path,
+the failing setup step, and the original traceback. Existing old log lines are
+retained, so use the most recent timestamped failure. Native PKGs replace the
+app at the documented Applications path; they do not replace user vocabulary.
+
 The native packages include the runtime. Python and Node.js are not required.
 The companion binds only to `127.0.0.1:43127` and runs in the background through
 a per-user login entry. No terminal needs to remain open. Word development
