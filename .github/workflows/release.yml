@@ -172,6 +172,15 @@ jobs:
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
           echo "sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
           printf 'Preview build for commit %s.\n\nNative Word installers are included for macOS arm64 (.pkg) and Windows x64 (.exe). They bundle the runtime, so users do not need Python or Node.js. The macOS app requests localhost certificate trust and completes Word registration and login startup on first launch. The Windows installer opens the app setup wizard after installation, which requests certificate trust and configures startup. These unsigned preview packages may be blocked by OS or organization policy.\n\nThe script ZIPs remain available as an alternative. They require Python 3.9 or later and Node.js 22 LTS for certificate setup, and include install-word.command or install-word.cmd with login startup, stop, and uninstall support.\n\nThe LibreOffice OXT installs as a standalone Writer extension and does not need the Word companion server. Real Word acceptance testing remains unverified. See [SETUP.md](https://github.com/%s/blob/%s/SETUP.md) for setup and sideloading instructions.' "$HEAD_SHA" "$GH_REPO" "$HEAD_SHA" > release-notes.md
+          cat >> release-notes.md <<'NOTES'
+
+
+          ### macOS unsigned preview approval
+
+          If macOS shows "Not Opened", choose **Done**, then go to **System Settings > Privacy & Security > Security** and select **Open Anyway** for the PKG. Authenticate and confirm **Open**. After installation, open **LOD-pane-Word** in Applications; approve that app separately if prompted.
+
+          Only approve a release you trust. Keep Gatekeeper enabled. [Apple's instructions](https://support.apple.com/en-us/102445) explain this per-download exception.
+          NOTES
 
       - name: Check for an existing release
         id: existing

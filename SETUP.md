@@ -105,6 +105,28 @@ Apple Silicon; Intel Macs can use the script setup below. Real Word acceptance
 testing remains open. Frozen package smoke tests verify real loopback TLS with
 temporary certificates, without modifying the runner's trust store or Word.
 
+### macOS blocks the unsigned PKG
+
+The preview PKG has no Developer ID signature or Apple notarization. macOS may
+show **Not Opened** and say Apple could not verify that it is free of malware.
+If you trust this release and want to proceed, approve this download explicitly:
+
+1. In the warning, choose **Done**.
+2. Open **System Settings > Privacy & Security** and scroll to **Security**.
+3. Find the notice for `lod-pane-word-macos-arm64.pkg` and choose **Open Anyway**.
+4. Authenticate if asked, then confirm **Open** in the next prompt.
+5. Finish the installer, then open **LOD-pane-Word** from Applications. If that
+   app is separately blocked, use the same per-app approval steps for it.
+
+This is Apple's documented exception for a trusted download. Keep Gatekeeper
+enabled; no Terminal commands or global security changes are needed. If your
+organization prevents approval, use its approved deployment process.
+
+[Apple's instructions for opening unsigned software](https://support.apple.com/en-us/102445).
+The permanent distribution fix is Developer ID Application signing for the app,
+Developer ID Installer signing for the PKG, and Apple notarization. Those
+credentials are not currently configured.
+
 ### Installer scripts for macOS and Windows
 
 The ZIP scripts are an alternative to the native installers.

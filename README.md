@@ -100,6 +100,7 @@ the background, including at future sign-ins. Restart Word and open
 the integration. Windows also has an entry in Installed apps.
 
 These preview installers are unsigned. Development sideloading must be allowed.
+If macOS blocks the PKG, follow the [per-download approval steps](SETUP.md#macos-blocks-the-unsigned-pkg).
 The source ZIPs remain available for manual setup. See [SETUP.md](SETUP.md) for
 paths, platform limits, and troubleshooting.
 
