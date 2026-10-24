@@ -4,9 +4,59 @@ LOD pane is a reading-first dictionary for Luxembourgish. Select a word in
 Microsoft Word or LibreOffice Writer, read its meaning and example, and save it
 to a local vocabulary notebook.
 
-This is an early implementation. The LibreOffice extension and the Word task
-pane still need acceptance testing in the real applications. The project is not
-an official LOD product.
+This is an early implementation. Lookup, meaning changes, and vocabulary saving
+have been checked in the installed LibreOffice sidebar on macOS. The full
+acceptance checklist and real Word testing remain open. This is not an official
+LOD product.
+
+## Demo
+
+### LibreOffice Writer
+
+[![Writer lookup, meaning selection, and Favorites save](docs/media/libreoffice-demo.gif)](docs/media/libreoffice-demo.webm)
+
+This step animation uses screenshots from the installed native sidebar with live
+LOD results and an isolated vocabulary database.
+
+![Selected word and live dictionary result in Writer](docs/media/libreoffice-usage.png)
+
+### Word task-pane preview
+
+[![Short Word task pane demo](docs/media/word-demo.gif)](docs/media/word-demo.webm)
+
+The Word captures use the real task-pane code with a fixture dictionary and an
+Office.js boundary stub. They are product previews, not evidence of real Word
+acceptance.
+
+## How it works
+
+### Look up a selected word
+
+Select a Luxembourgish word in the document. The pane opens its LOD meaning,
+grammar, example, and separate senses when the entry has more than one.
+
+<img src="docs/media/word-lookup.png" width="336" alt="Word task pane showing the Luxembourgish word Wieder, its grammar, meaning, and example">
+
+### Add a note and document excerpt
+
+Notes stay hidden until requested or saved. A document excerpt is optional,
+limited to 1,000 characters, and kept around the selected word.
+
+<img src="docs/media/word-note-context.png" width="336" alt="Word task pane with a personal note and document excerpt open">
+
+### Save and revisit vocabulary
+
+Save a meaning to Study or Favorites, then search, edit, remove, or export the
+local vocabulary.
+
+<img src="docs/media/word-saved.png" width="336" alt="Saved vocabulary view with a word, translation, note, and document excerpt">
+
+### Preview a replacement
+
+Replacement uses the LOD headword, not a translation. Nothing changes until the
+preview is confirmed, and the host's normal Undo remains available.
+
+<img src="docs/media/word-replace.png" width="336" alt="Replacement preview showing the selected word and the LOD headword">
 
 ## What it does
 
@@ -32,6 +82,8 @@ python3 tools/build.py
 
 Install `dist/lod-pane.oxt` through **Tools > Extensions**, restart LibreOffice,
 then open **View > Sidebar > LOD pane**. Writer does not need Node or a server.
+
+<img src="docs/media/libreoffice-install.png" width="588" alt="LibreOffice Extension Manager showing LOD pane 0.7.0 enabled">
 
 ### Microsoft Word
 

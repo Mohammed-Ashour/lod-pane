@@ -33,6 +33,7 @@ jobs:
           server.py
           tools/build.py
           tools/install_word.py
+          tools/libreoffice-media.py
           tests/test_runtime.py
           tests/libreoffice-runtime.py
 
@@ -42,6 +43,7 @@ jobs:
           node --check tests/word-runtime.cjs
           node --check tests/prototypes.cjs
           node --check tests/learner-prototypes.cjs
+          node --check tests/readme-media.cjs
 
       - name: Run core, HTTP, and package tests
         run: python3 tests/test_runtime.py

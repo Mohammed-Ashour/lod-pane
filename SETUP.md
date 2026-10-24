@@ -5,8 +5,9 @@ LOD pane has two hosts:
 - LibreOffice Writer uses a native UNO sidebar and needs no server.
 - Microsoft Word uses a local HTTPS companion and Office.js.
 
-This is a development setup. Real Word and rendered Writer acceptance still
-need to be completed before daily use.
+This is a development setup. The installed Writer sidebar has passed a macOS
+smoke check for live lookup, meaning changes, and saving. Complete the checklist
+below before daily use. Real Word remains unverified.
 
 ## Requirements
 
