@@ -71,34 +71,33 @@ stay in the local database.
 
 ## Quick start
 
+[Download a release](https://github.com/Mohammed-Ashour/lod-pane/releases).
+Preview releases are published after CI passes for each push or merge to `main`.
+This repository is private, so downloads require repository access.
+
 Python 3.9 or later is required. LibreOffice 7.4 or later must include Python
 UNO support.
 
 ### LibreOffice Writer
 
-```sh
-python3 tools/build.py
-```
-
-Install `dist/lod-pane.oxt` through **Tools > Extensions**, restart LibreOffice,
+Download `lod-pane.oxt` and install it through **Tools > Extensions**, restart LibreOffice,
 then open **View > Sidebar > LOD pane**. Writer does not need Node or a server.
+To build from source instead, run `python3 tools/build.py`.
 
 <img src="docs/media/libreoffice-install.png" width="588" alt="LibreOffice Extension Manager showing LOD pane 0.7.0 enabled">
 
 ### Microsoft Word
 
-Word currently needs the local HTTPS companion and a trusted development
-certificate:
+Download `lod-pane-word-macos.zip` or `lod-pane-word-windows.zip` and extract it.
+Install Python 3.9+ and Node.js 22 LTS, close Word, then run `install-word.command`
+on macOS or `install-word.cmd` on Windows. Follow Microsoft's certificate trust
+prompts. Setup registers the development manifest and starts the local HTTPS
+companion in the background, including at future sign-ins.
 
-```sh
-npx --yes office-addin-dev-certs install
-python3 tools/build.py
-python3 server.py
-```
-
-Keep the companion running and upload `dist/word-manifest.xml` through
-**Home > Add-ins > More Settings > Upload My Add-in**. Desktop Word has
-additional sideloading routes in [SETUP.md](SETUP.md).
+Restart Word and open **Home > Add-ins > LOD pane**. The download also includes
+start, stop, status, and uninstall scripts. These are setup scripts, not signed
+PKG/EXE installers. Development sideloading must be allowed. See [SETUP.md](SETUP.md)
+for manual installation, paths, and troubleshooting.
 
 The manifest requests `ReadWriteDocument` because replacement is an explicit
 feature. Lookup, saving vocabulary, and Home do not edit the document.

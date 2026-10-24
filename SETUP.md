@@ -23,6 +23,13 @@ Sandboxed or store editions of LibreOffice are not covered.
 
 ## Build
 
+For installation, download the `.oxt` or your platform's Word ZIP from
+[GitHub Releases](https://github.com/Mohammed-Ashour/lod-pane/releases).
+You do not need a source checkout or build. The repository is private; downloads
+require repository access.
+
+To build from source instead:
+
 From the repository root:
 
 ```sh
@@ -36,16 +43,20 @@ dist/lod-pane.oxt
 dist/word-manifest.xml
 dist/start-word.command
 dist/start-word.cmd
+dist/lod-pane-word-macos.zip
+dist/lod-pane-word-windows.zip
+dist/lod-pane-word.zip
+dist/SHA256SUMS
 ```
 
 It also writes `word/icon.png`, which the Word pane uses.
 
 ## LibreOffice Writer
 
-1. Run `python3 tools/build.py`.
+1. Download `lod-pane.oxt` from the release, or run `python3 tools/build.py`.
 2. Open **Tools > Extensions** or **Tools > Extension Manager**.
 3. Remove an older LOD pane installation if one exists.
-4. Add `dist/lod-pane.oxt`.
+4. Add the downloaded `lod-pane.oxt`, or `dist/lod-pane.oxt` from a source build.
 5. Quit LibreOffice completely, reopen Writer, then choose **View > Sidebar > LOD pane**.
 6. Open Settings and confirm the extension reports `v0.7.0`.
 
@@ -53,6 +64,45 @@ Do not lower macro security or enable a UNO network listener. The sidebar is a
 registered extension, not a document macro.
 
 ## Microsoft Word
+
+### Installer scripts for macOS and Windows
+
+1. Install Python 3.9+ from [python.org](https://www.python.org/downloads/) and
+   Node.js 22 LTS from [nodejs.org](https://nodejs.org/). On Windows, include the
+   Python launcher and `pythonw.exe`.
+2. Download and extract `lod-pane-word-macos.zip` or `lod-pane-word-windows.zip`.
+3. Close Word. Run `install-word.command` on macOS or `install-word.cmd` on
+   Windows. Follow Microsoft's localhost certificate trust prompts.
+4. Restart Word and open **Home > Add-ins > LOD pane**.
+
+Setup copies the companion into your application-data folder, registers the
+manifest using Microsoft's `office-addin-dev-settings`, and starts the HTTPS
+server in the background. It starts again at sign-in through a per-user macOS
+LaunchAgent or Windows Run entry. No terminal needs to stay open. Development
+sideloading must be permitted by your Word installation and organization.
+
+The download includes matching `start-word`, `stop-word`, `status-word`, and
+`uninstall-word` scripts. Stop affects the current session; uninstall removes
+login startup and manifest registration. Vocabulary and the shared Microsoft
+development certificates are retained. Re-running setup updates the installed
+files; failed updates attempt to restore the previous files and startup state.
+
+| OS | Installed files and `companion.log` |
+| --- | --- |
+| macOS | `~/Library/Application Support/LOD pane/word-companion/` |
+| Windows | `%LOCALAPPDATA%\LOD pane\word-companion\` |
+
+The management script also remains in `tools/install_word.py` under that folder.
+Run it with `start`, `stop`, `status`, or `uninstall` if you removed the download.
+Keep Python installed, because login startup records its absolute executable
+path. After moving or upgrading Python, run setup again.
+
+These are script installers, not signed `.pkg` or `.exe` packages. The tests
+exercise isolated lifecycle behavior and mock Office/startup settings; they do
+not establish real Word acceptance. If OS or organization policy blocks setup,
+use an approved deployment route rather than bypassing the policy.
+
+### Manual setup
 
 ### 1. Trust a localhost certificate
 
@@ -141,6 +191,7 @@ acceptance.
 | Symptom | Check |
 | --- | --- |
 | Word pane is blank | Start `python3 server.py`, confirm the development certificate, and check local-network policy. |
+| Installed Word companion is unavailable | Run `status-word`, inspect `companion.log`, then run `start-word`. Re-run setup if Python moved or the certificate expired. |
 | Word add-in is missing | Restart Word and verify the manifest location or catalog. |
 | Writer sidebar is blank | Reinstall the extension, fully restart LibreOffice, and inspect `panel-error.log` in the data folder. |
 | Writer shows an old layout | Remove the cached extension and confirm `v0.7.0` in Settings. |
@@ -162,6 +213,9 @@ In both hosts, test:
 
 Official references:
 
+- [Microsoft Office add-in development tooling](https://github.com/OfficeDev/Office-Addin-Scripts)
+- [macOS launch agents](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [Windows login Run entries](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)
 - [Sideload Office Add-ins for testing](https://learn.microsoft.com/en-us/office/dev/add-ins/testing/sideload-office-add-ins-for-testing)
 - [Sideload an Office Add-in on Mac](https://learn.microsoft.com/en-us/office/dev/add-ins/testing/sideload-an-office-add-in-on-mac)
 - [Create a network shared folder catalog](https://learn.microsoft.com/en-us/office/dev/add-ins/testing/create-a-network-shared-folder-catalog-for-task-pane-and-content-add-ins)

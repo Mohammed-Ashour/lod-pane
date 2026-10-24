@@ -166,6 +166,20 @@ def run():
     ns = {"o": "http://schemas.microsoft.com/office/appforoffice/1.1"}
     assert manifest.find("o:Permissions", ns).text == "ReadWriteDocument"
     assert manifest.find("o:DefaultSettings/o:SourceLocation", ns).attrib["DefaultValue"].endswith("/word.html")
+    with ZipFile(ROOT / "dist/lod-pane-word.zip") as archive:
+        expected = {"server.py", "lodpane.py", "SETUP.md", "START-HERE.txt", "tools/install_word.py",
+                    "word/index.html", "word/app.js", "word/style.css", "word/icon.png",
+                    "dist/word-manifest.xml", "dist/start-word.command", "dist/start-word.cmd"}
+        wrappers = {action + "-word." + suffix for action in ("install", "start", "stop", "status", "uninstall")
+                    for suffix in ("command", "cmd")}
+        assert set(archive.namelist()) == {"lod-pane-word/" + name for name in expected | wrappers}
+        for name in expected - {"START-HERE.txt"}:
+            assert archive.read("lod-pane-word/" + name) == (ROOT / name).read_bytes()
+        assert archive.getinfo("lod-pane-word/dist/start-word.command").external_attr >> 16 & 0o111
+    import hashlib
+    for line in (ROOT / "dist/SHA256SUMS").read_text().splitlines():
+        digest, name = line.split("  ")
+        assert hashlib.sha256((ROOT / "dist" / name).read_bytes()).hexdigest() == digest
     print("PASS: live-shape LOD parsing, anchored context, sense separation, stale-write rejection, preferences, offline saved lookup/edit, deletion, HTTP boundaries, and both package formats.")
 
 

@@ -36,6 +36,7 @@ jobs:
           tools/libreoffice-media.py
           tests/test_runtime.py
           tests/libreoffice-runtime.py
+          tests/test_word_install.py
 
       - name: Check JavaScript syntax
         run: |

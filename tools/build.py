@@ -1,5 +1,6 @@
 """Build the LibreOffice OXT and Word manifest using only Python's standard library."""
 from pathlib import Path
+import hashlib
 import struct
 import zlib
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -72,7 +73,69 @@ def main():
     launcher.write_text('#!/bin/sh\ncd -- "$(dirname -- "$0")/.."\nexport PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"\npython3 server.py\nprintf "Press Return to close this window."\nread answer\n', encoding="utf-8")
     launcher.chmod(0o755)
     (DIST / "start-word.cmd").write_text('@echo off\r\ncd /d "%~dp0.."\r\npy -3 server.py\r\npause\r\n', encoding="utf-8")
-    print("Built dist/lod-pane.oxt, dist/word-manifest.xml, and Word companion launchers.")
+    # Preserve the source layout so the existing launchers and /help route work.
+    payload = ("server.py", "lodpane.py", "SETUP.md", "word/index.html",
+               "word/app.js", "word/style.css", "word/icon.png", "tools/install_word.py",
+               "dist/word-manifest.xml", "dist/start-word.command", "dist/start-word.cmd")
+    wrappers = {}
+    setup = DIST / "word-setup"
+    setup.mkdir(exist_ok=True)
+    for action in ("install", "start", "stop", "status", "uninstall"):
+        mac = setup / (action + "-word.command")
+        mac.write_text('#!/bin/sh\ncd -- "$(dirname -- "$0")"\nexport PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"\n'
+                       'python3 tools/install_word.py ' + action + '\nresult=$?\n'
+                       'printf "Press Return to close this window."\nread answer\nexit "$result"\n', encoding="utf-8")
+        mac.chmod(0o755)
+        windows = setup / (action + "-word.cmd")
+        windows.write_bytes(('@echo off\r\ncd /d "%~dp0"\r\n'
+                             'where py >nul 2>nul\r\nif errorlevel 1 (\r\n'
+                             '  echo Install Python 3.9 or later from python.org, including the Python launcher.\r\n'
+                             '  pause\r\n  exit /b 1\r\n)\r\n'
+                             'py -3 tools/install_word.py ' + action + '\r\nset result=%errorlevel%\r\npause\r\nexit /b %result%\r\n').encode("utf-8"))
+        wrappers[mac.name] = mac
+        wrappers[windows.name] = windows
+    intro = """LOD pane for Microsoft Word
+
+Extract this entire ZIP. Install Python 3.9+ and Node.js 22 LTS first.
+Close Word, then run install-word.command on macOS or install-word.cmd on Windows.
+Follow Microsoft's development certificate trust prompts. Setup registers the
+manifest for development, starts the companion in the background, and enables
+startup at sign-in. Restart Word and open Home > Add-ins > LOD pane.
+
+Use start-word, stop-word, status-word, or uninstall-word in this folder to manage
+the installed companion. Uninstall retains vocabulary and the shared development
+certificate. The extracted download can be removed after installation; management
+is also available through the installed tools/install_word.py script.
+
+These are setup scripts, not signed PKG/EXE installers. They require installed
+Python and Node.js and permitted development sideloading. See SETUP.md for paths,
+manual installation, troubleshooting, and remaining real Word acceptance checks.
+Never disable certificate validation or organization policy.
+"""
+    for platform in ("", "-macos", "-windows"):
+        with ZipFile(DIST / ("lod-pane-word" + platform + ".zip"), "w", ZIP_DEFLATED) as archive:
+            for name in payload:
+                target = "lod-pane-word/" + name
+                archive.write(ROOT / name, target)
+                if name.endswith(".command"):
+                    archive.getinfo(target).create_system = 3
+                    archive.getinfo(target).external_attr = 0o100755 << 16
+            for name, path in wrappers.items():
+                if not platform or name.endswith(".command" if platform == "-macos" else ".cmd"):
+                    target = "lod-pane-word/" + name
+                    archive.write(path, target)
+                    if name.endswith(".command"):
+                        archive.getinfo(target).create_system = 3
+                        archive.getinfo(target).external_attr = 0o100755 << 16
+            archive.writestr("lod-pane-word/START-HERE.txt", intro)
+    assets = ("lod-pane.oxt", "lod-pane-word.zip", "lod-pane-word-macos.zip",
+              "lod-pane-word-windows.zip", "word-manifest.xml")
+    (DIST / "SHA256SUMS").write_text("".join(
+        hashlib.sha256((DIST / name).read_bytes()).hexdigest() + "  " + name + "\n"
+        for name in assets
+    ), encoding="utf-8")
+    print("Built LibreOffice OXT, Word setup ZIPs, manifest, launchers, and SHA256SUMS in dist/.")
+
 
 
 if __name__ == "__main__":

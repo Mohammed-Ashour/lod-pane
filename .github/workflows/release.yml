@@ -1,0 +1,166 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+
+concurrency:
+  group: release-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  build-macos:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build packages
+        run: python tools/build.py
+
+      - name: Test Word installation packages
+        run: python tests/test_word_install.py
+
+      - name: Run runtime tests
+        run: python tests/test_runtime.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-macos
+          if-no-files-found: error
+          path: |
+            dist/lod-pane-word-macos.zip
+            dist/lod-pane.oxt
+            dist/word-manifest.xml
+            dist/lod-pane-word.zip
+            dist/SHA256SUMS
+
+  build-windows:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build packages
+        run: python tools/build.py
+
+      - name: Test Word installation packages
+        run: python tests/test_word_install.py
+
+      - name: Run runtime tests
+        run: python tests/test_runtime.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          if-no-files-found: error
+          path: dist/lod-pane-word-windows.zip
+
+  publish:
+    needs: [build-macos, build-windows]
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate and verify release checksums
+        working-directory: dist
+        run: |
+          sha256sum lod-pane-word-macos.zip lod-pane-word-windows.zip lod-pane-word.zip lod-pane.oxt word-manifest.xml > SHA256SUMS
+          sha256sum --check SHA256SUMS
+
+      - name: Prepare release metadata
+        id: release
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          if [[ ! "$HEAD_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "Invalid workflow run commit SHA" >&2
+            exit 1
+          fi
+          short_sha="${HEAD_SHA:0:12}"
+          tag="preview-${short_sha}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          printf 'Preview build for commit %s.\n\nBuilt and tested on macOS 14 and Windows Server 2022 after CI passed on main.\n\nThe Word setup bundles require Python 3.9 or later and Node.js 22 LTS for development certificate setup. Follow the certificate prompts to trust the localhost development certificate. The macOS and Windows ZIPs include install-word.command and install-word.cmd setup entrypoints, with login startup, stop, and uninstall support.\n\nThe LibreOffice OXT installs as a standalone Writer extension and does not need the Word companion server.\n\nReal Word acceptance testing remains unverified. See [SETUP.md](https://github.com/%s/blob/%s/SETUP.md) for setup and sideloading instructions.' "$HEAD_SHA" "$GH_REPO" "$HEAD_SHA" > release-notes.md
+
+      - name: Check for an existing release
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish prerelease
+        if: steps.existing.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.release.outputs.tag }}
+          HEAD_SHA: ${{ steps.release.outputs.sha }}
+        run: >-
+          gh release create "$TAG"
+          dist/lod-pane-word-macos.zip
+          dist/lod-pane-word-windows.zip
+          dist/lod-pane-word.zip
+          dist/lod-pane.oxt
+          dist/word-manifest.xml
+          dist/SHA256SUMS
+          --target "$HEAD_SHA"
+          --repo "$GH_REPO"
+          --prerelease
+          --title "LOD pane preview $TAG"
+          --notes-file release-notes.md
