@@ -36,3 +36,28 @@ pkgbuild \
   --identifier org.lodpane.word.app \
   --version 0.7.0 \
   dist/lod-pane-word-macos-arm64.pkg
+
+python tests/test_native_libreoffice.py
+python -m PyInstaller \
+  --noconfirm \
+  --clean \
+  --onedir \
+  --windowed \
+  --name LOD-pane-LibreOffice \
+  --osx-bundle-identifier org.lodpane.libreoffice.app \
+  --paths . \
+  --paths tools \
+  --workpath dist/native-build-libreoffice \
+  --add-data "dist/lod-pane.oxt:dist" \
+  tools/native_libreoffice.py
+
+python tools/native/copy_licenses.py dist/LOD-pane-LibreOffice.app/Contents/Resources
+codesign --force --deep --sign - dist/LOD-pane-LibreOffice.app
+dist/LOD-pane-LibreOffice.app/Contents/MacOS/LOD-pane-LibreOffice --self-test --no-dialog
+
+pkgbuild \
+  --component dist/LOD-pane-LibreOffice.app \
+  --install-location /Applications \
+  --identifier org.lodpane.libreoffice.app \
+  --version 0.7.0 \
+  dist/lod-pane-libreoffice-macos-arm64.pkg

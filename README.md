@@ -80,8 +80,14 @@ optional script installers require Python 3.9 or later.
 
 ### LibreOffice Writer
 
-Download `lod-pane.oxt` and install it through **Tools > Extensions**, restart LibreOffice,
-then open **View > Sidebar > LOD pane**. Writer does not need Node or a server.
+Install LibreOffice, then download `lod-pane-libreoffice-windows-x64.exe` or
+`lod-pane-libreoffice-macos-arm64.pkg`. Run the installer. On macOS, open
+**LOD-pane-LibreOffice** from Applications afterward. The helper opens the
+bundled extension in LibreOffice; confirm **Add** and choose **Only for me** if
+asked. Fully quit and reopen LibreOffice, then open **View > Sidebar > LOD pane**.
+No server, certificate setup, Python, or Node.js installation is needed.
+
+You can also download `lod-pane.oxt` and add it through **Tools > Extensions**.
 To build from source instead, run `python3 tools/build.py`.
 
 <img src="docs/media/libreoffice-install.png" width="588" alt="LibreOffice Extension Manager showing LOD pane 0.7.0 enabled">

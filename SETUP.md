@@ -23,7 +23,7 @@ Sandboxed or store editions of LibreOffice are not covered.
 
 ## Build
 
-For installation, download the `.oxt` or your platform's Word ZIP from
+For installation, download a native installer, `.oxt`, or optional Word ZIP from
 [GitHub Releases](https://github.com/Mohammed-Ashour/lod-pane/releases).
 You do not need a source checkout or build. The repository is private; downloads
 require repository access.
@@ -52,6 +52,35 @@ dist/SHA256SUMS
 It also writes `word/icon.png`, which the Word pane uses.
 
 ## LibreOffice Writer
+
+### Native installers
+
+| Platform | File |
+| --- | --- |
+| Windows x64 | `lod-pane-libreoffice-windows-x64.exe` |
+| macOS on Apple Silicon | `lod-pane-libreoffice-macos-arm64.pkg` |
+
+LibreOffice 7.4+ must already be installed. Run the native installer; on Windows,
+leave **Open LibreOffice Extension Manager** selected when setup finishes. On
+macOS, open **LOD-pane-LibreOffice** from Applications after installing the PKG.
+The helper locates LibreOffice and opens the bundled OXT directly in its real
+Extension Manager. Confirm **Add**, choose **Only for me** if asked, and fully
+quit and reopen LibreOffice. Open **View > Sidebar > LOD pane**.
+
+The helper opening Extension Manager does not mean registration has completed;
+the final confirmation belongs to LibreOffice. The helper requires no external
+Python or Node.js and creates no server, certificate trust, or login startup.
+Native packages are unsigned. The macOS approval steps below apply to these
+PKGs and apps too. Intel Macs and Linux can use the OXT directly.
+
+To remove the extension, use **Tools > Extensions > LOD pane > Remove** and
+restart LibreOffice. Removing the native helper through Windows Installed apps
+or deleting its macOS app removes only that helper. Vocabulary is retained.
+For a custom LibreOffice location, the helper accepts `--libreoffice` with its
+app bundle or `soffice` executable path. If discovery fails, use the manual OXT
+route below.
+
+### Manual OXT installation
 
 1. Download `lod-pane.oxt` from the release, or run `python3 tools/build.py`.
 2. Open **Tools > Extensions** or **Tools > Extension Manager**.
@@ -113,10 +142,10 @@ If you trust this release and want to proceed, approve this download explicitly:
 
 1. In the warning, choose **Done**.
 2. Open **System Settings > Privacy & Security** and scroll to **Security**.
-3. Find the notice for `lod-pane-word-macos-arm64.pkg` and choose **Open Anyway**.
+3. Find the notice for the Word or LibreOffice PKG you downloaded and choose **Open Anyway**.
 4. Authenticate if asked, then confirm **Open** in the next prompt.
-5. Finish the installer, then open **LOD-pane-Word** from Applications. If that
-   app is separately blocked, use the same per-app approval steps for it.
+5. Finish the installer, then open **LOD-pane-Word** or **LOD-pane-LibreOffice**
+   from Applications. If the app is separately blocked, approve it the same way.
 
 This is Apple's documented exception for a trusted download. Keep Gatekeeper
 enabled; no Terminal commands or global security changes are needed. If your
@@ -277,6 +306,7 @@ In both hosts, test:
 
 Official references:
 
+- [LibreOffice Extension Manager](https://help.libreoffice.org/latest/en-GB/text/shared/01/packagemanager.html)
 - [Microsoft Office add-in development tooling](https://github.com/OfficeDev/Office-Addin-Scripts)
 - [macOS launch agents](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
 - [Windows login Run entries](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)

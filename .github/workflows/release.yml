@@ -60,6 +60,7 @@ jobs:
             dist/lod-pane-word.zip
             dist/SHA256SUMS
             dist/lod-pane-word-macos-arm64.pkg
+            dist/lod-pane-libreoffice-macos-arm64.pkg
 
   build-windows:
     if: >-
@@ -125,6 +126,16 @@ jobs:
           if (-not $iscc) { throw "Inno Setup compiler (ISCC.exe) was not found." }
           & $iscc tools/native/windows.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE." }
+          python tests/test_native_libreoffice.py
+          if ($LASTEXITCODE -ne 0) { throw "Native LibreOffice tests failed with exit code $LASTEXITCODE." }
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOD-pane-LibreOffice --paths . --paths tools --workpath dist/native-build-libreoffice --add-data "dist/lod-pane.oxt;dist" tools/native_libreoffice.py
+          if ($LASTEXITCODE -ne 0) { throw "LibreOffice PyInstaller build failed with exit code $LASTEXITCODE." }
+          python tools/native/copy_licenses.py dist/LOD-pane-LibreOffice
+          if ($LASTEXITCODE -ne 0) { throw "Copying LibreOffice license notices failed with exit code $LASTEXITCODE." }
+          $loSmoke = Start-Process -FilePath "dist\LOD-pane-LibreOffice\LOD-pane-LibreOffice.exe" -ArgumentList @("--self-test", "--no-dialog") -Wait -PassThru
+          if ($loSmoke.ExitCode -ne 0) { throw "Frozen LibreOffice helper smoke test failed with exit code $($loSmoke.ExitCode)." }
+          & $iscc tools/native/libreoffice.iss
+          if ($LASTEXITCODE -ne 0) { throw "LibreOffice Inno Setup build failed with exit code $LASTEXITCODE." }
 
       - uses: actions/upload-artifact@v4
         with:
@@ -133,6 +144,7 @@ jobs:
           path: |
             dist/lod-pane-word-windows.zip
             dist/lod-pane-word-windows-x64.exe
+            dist/lod-pane-libreoffice-windows-x64.exe
 
   publish:
     needs: [build-macos, build-windows]
@@ -171,7 +183,7 @@ jobs:
           tag="preview-${short_sha}"
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
           echo "sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
-          printf 'Preview build for commit %s.\n\nNative Word installers are included for macOS arm64 (.pkg) and Windows x64 (.exe). They bundle the runtime, so users do not need Python or Node.js. The macOS app requests localhost certificate trust and completes Word registration and login startup on first launch. The Windows installer opens the app setup wizard after installation, which requests certificate trust and configures startup. These unsigned preview packages may be blocked by OS or organization policy.\n\nThe script ZIPs remain available as an alternative. They require Python 3.9 or later and Node.js 22 LTS for certificate setup, and include install-word.command or install-word.cmd with login startup, stop, and uninstall support.\n\nThe LibreOffice OXT installs as a standalone Writer extension and does not need the Word companion server. Real Word acceptance testing remains unverified. See [SETUP.md](https://github.com/%s/blob/%s/SETUP.md) for setup and sideloading instructions.' "$HEAD_SHA" "$GH_REPO" "$HEAD_SHA" > release-notes.md
+          printf 'Preview build for commit %s.\n\nNative Word installers are included for macOS arm64 (.pkg) and Windows x64 (.exe). They bundle the runtime, so users do not need Python or Node.js. The macOS app requests localhost certificate trust and completes Word registration and login startup on first launch. The Windows installer opens the app setup wizard after installation, which requests certificate trust and configures startup. These unsigned preview packages may be blocked by OS or organization policy.\n\nNative LibreOffice installers are included for macOS arm64 (.pkg) and Windows x64 (.exe). They bundle the helper runtime, so users do not need Python or Node.js, but LibreOffice must already be installed. The helper opens LibreOffice Extension Manager with the bundled OXT; the user must confirm adding it there. Removing the helper does not remove the extension from LibreOffice.\n\nThe Word script ZIPs remain available as an alternative. They require Python 3.9 or later and Node.js 22 LTS for certificate setup, and include install-word.command or install-word.cmd with login startup, stop, and uninstall support. The raw LibreOffice OXT also remains available for manual installation.\n\nReal Word acceptance testing remains unverified. See [SETUP.md](https://github.com/%s/blob/%s/SETUP.md) for setup and sideloading instructions.' "$HEAD_SHA" "$GH_REPO" "$HEAD_SHA" > release-notes.md
           cat >> release-notes.md <<'NOTES'
 
 
@@ -212,6 +224,8 @@ jobs:
           dist/SHA256SUMS
           dist/lod-pane-word-macos-arm64.pkg
           dist/lod-pane-word-windows-x64.exe
+          dist/lod-pane-libreoffice-macos-arm64.pkg
+          dist/lod-pane-libreoffice-windows-x64.exe
           --target "$HEAD_SHA"
           --repo "$GH_REPO"
           --prerelease

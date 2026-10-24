@@ -39,6 +39,8 @@ jobs:
           tests/test_word_install.py
           tools/native_word.py
           tests/test_native_word.py
+          tools/native_libreoffice.py
+          tests/test_native_libreoffice.py
 
       - name: Check JavaScript syntax
         run: |
