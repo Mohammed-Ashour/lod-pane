@@ -86,7 +86,9 @@ def run_background(directory):
         signal.signal(signal.SIGINT, request_stop)
         with (directory / "companion.log").open("ab") as log:
             # Terminate only this owned child, never a saved PID or process-name match.
-            child = subprocess.Popen([sys.executable, "-u", str(directory / "server.py")],
+            args = ([sys.executable, "serve", "--install-dir", str(directory)] if getattr(sys, "frozen", False)
+                    else [sys.executable, "-u", str(directory / "server.py")])
+            child = subprocess.Popen(args,
                                      cwd=directory, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
                                      creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0)
             try:
@@ -118,6 +120,8 @@ def background_python():
 
 
 def command(directory):
+    if getattr(sys, "frozen", False):
+        return [sys.executable, "run", "--install-dir", str(directory)]
     args = [background_python(), str(directory / "tools/install_word.py"), "run"]
     if directory != default_directory().resolve():
         args += ["--install-dir", str(directory)]
@@ -126,12 +130,16 @@ def command(directory):
 
 def wait_ready(directory):
     # Validate TLS using the same local development certificate, never an unverified context.
-    context = ssl.create_default_context(cafile=str(Path.home() / ".office-addin-dev-certs/localhost.crt"))
+    native = getattr(sys, "frozen", False)
+    certificate = (directory / "certificates/ca.crt" if native
+                   else Path.home() / ".office-addin-dev-certs/ca.crt")
+    context = ssl.create_default_context(cafile=str(certificate))
+    root = Path(sys._MEIPASS) if native else directory
     deadline = time.monotonic() + 15
     while time.monotonic() < deadline:
         try:
             with urlopen("https://localhost:43127/word.html", context=context, timeout=1) as response:
-                if response.read() == (directory / "word/index.html").read_bytes() and running(directory):
+                if response.read() == (root / "word/index.html").read_bytes() and running(directory):
                     return
         except (OSError, ValueError):
             pass
@@ -140,7 +148,7 @@ def wait_ready(directory):
 
 
 def start(directory):
-    if not (directory / "server.py").is_file():
+    if not getattr(sys, "frozen", False) and not (directory / "server.py").is_file():
         raise RuntimeError("Install the companion first.")
     if not running(directory):
         with socket.socket() as probe:

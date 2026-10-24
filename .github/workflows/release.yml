@@ -46,6 +46,9 @@ jobs:
       - name: Run runtime tests
         run: python tests/test_runtime.py
 
+      - name: Build and smoke-test native macOS app
+        run: bash tools/native/build_macos.sh
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
@@ -56,6 +59,7 @@ jobs:
             dist/word-manifest.xml
             dist/lod-pane-word.zip
             dist/SHA256SUMS
+            dist/lod-pane-word-macos-arm64.pkg
 
   build-windows:
     if: >-
@@ -86,11 +90,49 @@ jobs:
       - name: Run runtime tests
         run: python tests/test_runtime.py
 
+      - name: Build and smoke-test native Windows app
+        shell: pwsh
+        run: |
+          python -m pip install pyinstaller==6.16.0 cryptography==43.0.3
+          if ($LASTEXITCODE -ne 0) { throw "Installing native build dependencies failed with exit code $LASTEXITCODE." }
+          python tests/test_native_word.py
+          if ($LASTEXITCODE -ne 0) { throw "Native Word tests failed with exit code $LASTEXITCODE." }
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name LOD-pane-Word --paths . --paths tools --workpath dist/native-build --copy-metadata cryptography --copy-metadata cffi --add-data "word;word" --add-data "SETUP.md;." --add-data "dist/word-manifest.xml;dist" tools/native_word.py
+          if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed with exit code $LASTEXITCODE." }
+          python tools/native/copy_licenses.py dist/LOD-pane-Word
+          if ($LASTEXITCODE -ne 0) { throw "Copying third-party license notices failed with exit code $LASTEXITCODE." }
+          $smoke = Start-Process -FilePath "dist\LOD-pane-Word\LOD-pane-Word.exe" -ArgumentList @("--self-test", "--no-dialog") -Wait -PassThru
+          if ($smoke.ExitCode -ne 0) {
+            $diagnostics = Join-Path ([System.IO.Path]::GetTempPath()) "lod-native-smoke-diagnostics\companion.log"
+            if (Test-Path $diagnostics) { Get-Content $diagnostics }
+            throw "Frozen app smoke test failed with exit code $($smoke.ExitCode)."
+          }
+          $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) {
+            $programFilesX86 = [Environment]::GetFolderPath('ProgramFilesX86')
+            $candidate = Join-Path $programFilesX86 "Inno Setup 6\ISCC.exe"
+            if (Test-Path $candidate) { $iscc = $candidate }
+          }
+          if (-not $iscc) {
+            choco install innosetup --version=6.7.1 --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { throw "Installing Inno Setup failed with exit code $LASTEXITCODE." }
+            $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
+            if (-not $iscc) {
+              $candidate = Join-Path $programFilesX86 "Inno Setup 6\ISCC.exe"
+              if (Test-Path $candidate) { $iscc = $candidate }
+            }
+          }
+          if (-not $iscc) { throw "Inno Setup compiler (ISCC.exe) was not found." }
+          & $iscc tools/native/windows.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE." }
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-windows
           if-no-files-found: error
-          path: dist/lod-pane-word-windows.zip
+          path: |
+            dist/lod-pane-word-windows.zip
+            dist/lod-pane-word-windows-x64.exe
 
   publish:
     needs: [build-macos, build-windows]
@@ -111,7 +153,7 @@ jobs:
       - name: Generate and verify release checksums
         working-directory: dist
         run: |
-          sha256sum lod-pane-word-macos.zip lod-pane-word-windows.zip lod-pane-word.zip lod-pane.oxt word-manifest.xml > SHA256SUMS
+          sha256sum *.zip *.oxt *.xml *.pkg *.exe > SHA256SUMS
           sha256sum --check SHA256SUMS
 
       - name: Prepare release metadata
@@ -129,7 +171,7 @@ jobs:
           tag="preview-${short_sha}"
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
           echo "sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
-          printf 'Preview build for commit %s.\n\nBuilt and tested on macOS 14 and Windows Server 2022 after CI passed on main.\n\nThe Word setup bundles require Python 3.9 or later and Node.js 22 LTS for development certificate setup. Follow the certificate prompts to trust the localhost development certificate. The macOS and Windows ZIPs include install-word.command and install-word.cmd setup entrypoints, with login startup, stop, and uninstall support.\n\nThe LibreOffice OXT installs as a standalone Writer extension and does not need the Word companion server.\n\nReal Word acceptance testing remains unverified. See [SETUP.md](https://github.com/%s/blob/%s/SETUP.md) for setup and sideloading instructions.' "$HEAD_SHA" "$GH_REPO" "$HEAD_SHA" > release-notes.md
+          printf 'Preview build for commit %s.\n\nNative Word installers are included for macOS arm64 (.pkg) and Windows x64 (.exe). They bundle the runtime, so users do not need Python or Node.js. The macOS app requests localhost certificate trust and completes Word registration and login startup on first launch. The Windows installer opens the app setup wizard after installation, which requests certificate trust and configures startup. These unsigned preview packages may be blocked by OS or organization policy.\n\nThe script ZIPs remain available as an alternative. They require Python 3.9 or later and Node.js 22 LTS for certificate setup, and include install-word.command or install-word.cmd with login startup, stop, and uninstall support.\n\nThe LibreOffice OXT installs as a standalone Writer extension and does not need the Word companion server. Real Word acceptance testing remains unverified. See [SETUP.md](https://github.com/%s/blob/%s/SETUP.md) for setup and sideloading instructions.' "$HEAD_SHA" "$GH_REPO" "$HEAD_SHA" > release-notes.md
 
       - name: Check for an existing release
         id: existing
@@ -159,6 +201,8 @@ jobs:
           dist/lod-pane.oxt
           dist/word-manifest.xml
           dist/SHA256SUMS
+          dist/lod-pane-word-macos-arm64.pkg
+          dist/lod-pane-word-windows-x64.exe
           --target "$HEAD_SHA"
           --repo "$GH_REPO"
           --prerelease

@@ -4,3 +4,4 @@ __pycache__/
 *.py[cod]
 dist/
 node_modules/
+LOD-pane-Word.spec

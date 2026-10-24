@@ -15,7 +15,7 @@ below before daily use. Real Word remains unverified.
 | --- | --- |
 | Core and package build | Python 3.9 or later |
 | LibreOffice Writer | LibreOffice 7.4 or later with Python UNO support |
-| Word companion | Node.js 22 LTS for certificate setup |
+| Word script/manual setup | Node.js 22 LTS for certificate setup |
 | Browser checks | Google Chrome, OpenSSL, Playwright |
 
 Linux distributions may package UNO support separately as `python3-uno`.
@@ -65,7 +65,49 @@ registered extension, not a document macro.
 
 ## Microsoft Word
 
+### Native installers
+
+Download the native installer from the release:
+
+| Platform | File |
+| --- | --- |
+| Windows x64 | `lod-pane-word-windows-x64.exe` |
+| macOS on Apple Silicon | `lod-pane-word-macos-arm64.pkg` |
+
+Close Word, run the installer, and complete the one-time setup. The Windows
+wizard offers to launch setup when installation finishes. On macOS, open
+**LOD-pane-Word** in Applications after installing the PKG. Approve the local
+certificate and background startup when prompted. Restart Word and open
+**Home > Add-ins > LOD pane**.
+
+The native packages include the runtime. Python and Node.js are not required.
+The companion binds only to `127.0.0.1:43127` and runs in the background through
+a per-user login entry. No terminal needs to remain open. Word development
+sideloading must be allowed by your organization.
+
+Each installation creates its own localhost certificate and private key in
+`word-companion/certificates/` under the application-data folder listed below.
+The CA private key is discarded immediately after signing the localhost
+certificate. The public CA is added to the current user's trust store. No
+certificate or private key is included in a release. Reopen the app if setup
+needs to renew its certificate or its installation path changed.
+
+Open the installed app to start, stop, or uninstall the integration. Windows
+also provides Start Menu controls and an Installed apps uninstaller. On macOS,
+choose **Uninstall** in the app before removing it from Applications. Cleanup
+removes Word registration, login startup, and this installation's certificate
+trust. Vocabulary, logs, and certificate files are retained locally.
+
+The preview installers are unsigned and are not notarized. They may be blocked
+by OS or organization policy. Signing and notarization require developer
+credentials and are not claimed here. The macOS native package currently targets
+Apple Silicon; Intel Macs can use the script setup below. Real Word acceptance
+testing remains open. Frozen package smoke tests verify real loopback TLS with
+temporary certificates, without modifying the runner's trust store or Word.
+
 ### Installer scripts for macOS and Windows
+
+The ZIP scripts are an alternative to the native installers.
 
 1. Install Python 3.9+ from [python.org](https://www.python.org/downloads/) and
    Node.js 22 LTS from [nodejs.org](https://nodejs.org/). On Windows, include the
@@ -97,7 +139,7 @@ Run it with `start`, `stop`, `status`, or `uninstall` if you removed the downloa
 Keep Python installed, because login startup records its absolute executable
 path. After moving or upgrading Python, run setup again.
 
-These are script installers, not signed `.pkg` or `.exe` packages. The tests
+These ZIPs contain script installers. The tests
 exercise isolated lifecycle behavior and mock Office/startup settings; they do
 not establish real Word acceptance. If OS or organization policy blocks setup,
 use an approved deployment route rather than bypassing the policy.

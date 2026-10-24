@@ -75,8 +75,8 @@ stay in the local database.
 Preview releases are published after CI passes for each push or merge to `main`.
 This repository is private, so downloads require repository access.
 
-Python 3.9 or later is required. LibreOffice 7.4 or later must include Python
-UNO support.
+LibreOffice 7.4 or later must include Python UNO support. Source builds and the
+optional script installers require Python 3.9 or later.
 
 ### LibreOffice Writer
 
@@ -88,16 +88,20 @@ To build from source instead, run `python3 tools/build.py`.
 
 ### Microsoft Word
 
-Download `lod-pane-word-macos.zip` or `lod-pane-word-windows.zip` and extract it.
-Install Python 3.9+ and Node.js 22 LTS, close Word, then run `install-word.command`
-on macOS or `install-word.cmd` on Windows. Follow Microsoft's certificate trust
-prompts. Setup registers the development manifest and starts the local HTTPS
-companion in the background, including at future sign-ins.
+Download `lod-pane-word-windows-x64.exe` for Windows or
+`lod-pane-word-macos-arm64.pkg` for an Apple Silicon Mac. Close Word and run the
+installer. On macOS, open **LOD-pane-Word** from Applications after installation.
+Complete the one-time localhost certificate approval. No separate Python or
+Node.js installation is required.
 
-Restart Word and open **Home > Add-ins > LOD pane**. The download also includes
-start, stop, status, and uninstall scripts. These are setup scripts, not signed
-PKG/EXE installers. Development sideloading must be allowed. See [SETUP.md](SETUP.md)
-for manual installation, paths, and troubleshooting.
+Setup registers the development manifest and runs the local HTTPS companion in
+the background, including at future sign-ins. Restart Word and open
+**Home > Add-ins > LOD pane**. Open the installed app to start, stop, or uninstall
+the integration. Windows also has an entry in Installed apps.
+
+These preview installers are unsigned. Development sideloading must be allowed.
+The source ZIPs remain available for manual setup. See [SETUP.md](SETUP.md) for
+paths, platform limits, and troubleshooting.
 
 The manifest requests `ReadWriteDocument` because replacement is an explicit
 feature. Lookup, saving vocabulary, and Home do not edit the document.
@@ -114,8 +118,9 @@ tests/                 fixture-backed runtime and package checks
 docs/agdr/             architecture decision records
 ```
 
-The runtime uses only the Python standard library. The Word pane is plain
-HTML, CSS, and JavaScript.
+The shared dictionary/server core uses only the Python standard library. Native
+installers bundle cryptography for localhost certificates. The Word pane is
+plain HTML, CSS, and JavaScript.
 
 ## Checks
 
