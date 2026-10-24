@@ -1,0 +1,325 @@
+{
+  "entry": {
+    "lod_id": "WIEDER1",
+    "lemma": "Wieder",
+    "partOfSpeech": "SUBST",
+    "partOfSpeechLabel": "SUBST+N",
+    "microStructures": [
+      {
+        "partOfSpeech": "SUBST",
+        "partOfSpeechLabel": "SUBST+N",
+        "grammaticalUnits": [
+          {
+            "meanings": [
+              {
+                "meaningID": "WIEDER1UNI1",
+                "number": 1,
+                "declensionInfo": "kee Pluriel",
+                "targetLanguages": {
+                  "de": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "Wetter"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "Wetterlage"
+                      }
+                    ]
+                  },
+                  "fr": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "temps"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "situation météorologique"
+                      }
+                    ]
+                  },
+                  "en": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "weather"
+                      }
+                    ]
+                  },
+                  "pt": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "tempo"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "condições meteorológicas"
+                      }
+                    ]
+                  }
+                },
+                "examples": [
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "wa"
+                          },
+                          {
+                            "type": "word",
+                            "content": "schéint"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Wieder"
+                          },
+                          {
+                            "type": "word",
+                            "content": "ass,"
+                          },
+                          {
+                            "type": "word",
+                            "content": "si"
+                          },
+                          {
+                            "type": "word",
+                            "content": "vill"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Cyclisten"
+                          },
+                          {
+                            "type": "word",
+                            "content": "op"
+                          },
+                          {
+                            "type": "word",
+                            "content": "der"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Strooss"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false
+                  }
+                ]
+              },
+              {
+                "meaningID": "WIEDER1UNI2",
+                "number": 2,
+                "inflection": {
+                  "forms": [
+                    {
+                      "content": "Wiederen",
+                      "nRuleForm": "Wiedere"
+                    }
+                  ]
+                },
+                "targetLanguages": {
+                  "de": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "Gewitter"
+                      }
+                    ]
+                  },
+                  "fr": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "orage"
+                      }
+                    ]
+                  },
+                  "en": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "thunderstorm"
+                      }
+                    ]
+                  },
+                  "pt": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "trovoada"
+                      }
+                    ]
+                  }
+                },
+                "examples": [
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "et"
+                          },
+                          {
+                            "type": "word",
+                            "content": "ass"
+                          },
+                          {
+                            "type": "word",
+                            "content": "esou"
+                          },
+                          {
+                            "type": "word",
+                            "content": "dompeg,"
+                          },
+                          {
+                            "type": "word",
+                            "content": "et"
+                          },
+                          {
+                            "type": "word",
+                            "content": "gëtt"
+                          },
+                          {
+                            "type": "word",
+                            "content": "bestëmmt"
+                          },
+                          {
+                            "type": "word",
+                            "content": "nach"
+                          },
+                          {
+                            "type": "word",
+                            "content": "e"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Wieder"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false
+                  }
+                ],
+                "synonyms": [
+                  "Dimmer",
+                  "Donnerwieder"
+                ]
+              },
+              {
+                "meaningID": "WIEDER1UNI3",
+                "number": 3,
+                "declensionInfo": "kee Pluriel",
+                "targetLanguages": {
+                  "de": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "Wetter"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "Wettervorhersage"
+                      }
+                    ]
+                  },
+                  "fr": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "météo"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "prévision"
+                      }
+                    ]
+                  },
+                  "en": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "weather forecast"
+                      }
+                    ]
+                  },
+                  "pt": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "previsão do tempo"
+                      }
+                    ]
+                  }
+                },
+                "examples": [
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "maach"
+                          },
+                          {
+                            "type": "word",
+                            "content": "de"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Radio"
+                          },
+                          {
+                            "type": "word",
+                            "content": "méi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "haart,"
+                          },
+                          {
+                            "type": "word",
+                            "content": "ech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "wëll"
+                          },
+                          {
+                            "type": "word",
+                            "content": "d'"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Wieder",
+                            "joinWithPreviousWord": true
+                          },
+                          {
+                            "type": "word",
+                            "content": "lauschteren!"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,982 @@
+{
+  "entry": {
+    "lod_id": "MOIEN1",
+    "partOfSpeech": "SUBST",
+    "partOfSpeechLabel": "SUBST+M",
+    "lemma": "Moien",
+    "nRuleForm": "Moie",
+    "trademark": false,
+    "ipa": "mˈojən",
+    "microStructures": [
+      {
+        "partOfSpeech": "SUBST",
+        "partOfSpeechLabel": "SUBST+M",
+        "grammaticalUnits": [
+          {
+            "meanings": [
+              {
+                "meaningID": "MOIEN1UNI2",
+                "number": 1,
+                "meaningVideo": "444581668",
+                "inflection": {
+                  "forms": [
+                    {
+                      "content": "Moienter"
+                    }
+                  ]
+                },
+                "targetLanguages": {
+                  "de": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "Morgen"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "Vormittag"
+                      }
+                    ]
+                  },
+                  "fr": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "matin"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "matinée"
+                      }
+                    ]
+                  },
+                  "en": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "morning"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "first part of the day"
+                      }
+                    ]
+                  },
+                  "pt": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "manhã"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "parte inicial do dia"
+                      }
+                    ]
+                  }
+                },
+                "examples": [
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "mäi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Papp"
+                          },
+                          {
+                            "type": "word",
+                            "content": "mécht"
+                          },
+                          {
+                            "type": "word",
+                            "content": "all"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moien"
+                          },
+                          {
+                            "type": "word",
+                            "content": "de"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Baart"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/fe/fe798a824c6166f11c45939611fb8408.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/fe/fe798a824c6166f11c45939611fb8408.m4a"
+                    }
+                  },
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "erwäch"
+                          },
+                          {
+                            "type": "word",
+                            "content": "mech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "muer"
+                          },
+                          {
+                            "type": "word",
+                            "content": "de"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moien"
+                          },
+                          {
+                            "type": "word",
+                            "content": "ëm"
+                          },
+                          {
+                            "type": "word",
+                            "content": "siwen"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Auer!"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/9b/9bd1640635f4d3031bc70763e5aa8694.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/9b/9bd1640635f4d3031bc70763e5aa8694.m4a"
+                    }
+                  },
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "mir"
+                          },
+                          {
+                            "type": "word",
+                            "content": "haten"
+                          },
+                          {
+                            "type": "word",
+                            "content": "haut"
+                          },
+                          {
+                            "type": "word",
+                            "content": "e"
+                          },
+                          {
+                            "type": "word",
+                            "content": "stressege"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moien"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/8d/8d8c4269cbd19364fadefa2526602fb5.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/8d/8d8c4269cbd19364fadefa2526602fb5.m4a"
+                    }
+                  },
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "déi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "lescht"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moienter"
+                          },
+                          {
+                            "type": "word",
+                            "content": "hunn"
+                          },
+                          {
+                            "type": "word",
+                            "content": "ech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "am"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Gaart"
+                          },
+                          {
+                            "type": "word",
+                            "content": "geschafft"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/d5/d5f65c44f1afefdf02b110299f056a4d.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/d5/d5f65c44f1afefdf02b110299f056a4d.m4a"
+                    }
+                  },
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "ëm"
+                          },
+                          {
+                            "type": "word",
+                            "content": "wéi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "vill"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Auer"
+                          },
+                          {
+                            "type": "word",
+                            "content": "iesst"
+                          },
+                          {
+                            "type": "word",
+                            "content": "dir"
+                          },
+                          {
+                            "type": "word",
+                            "content": "gewéinlech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "zu"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moien"
+                          },
+                          {
+                            "type": "word",
+                            "content": "?",
+                            "joinWithPreviousWord": true
+                          }
+                        ]
+                      },
+                      {
+                        "type": "gloss",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "ëm"
+                          },
+                          {
+                            "type": "word",
+                            "content": "wéi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "vill"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Auer"
+                          },
+                          {
+                            "type": "word",
+                            "content": "drénkt"
+                          },
+                          {
+                            "type": "word",
+                            "content": "dir"
+                          },
+                          {
+                            "type": "word",
+                            "content": "gewéinlech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "moies"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Kaffi?"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/cf/cf4bbfbc34e19d8fb2b4206c75518e58.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/cf/cf4bbfbc34e19d8fb2b4206c75518e58.m4a"
+                    }
+                  }
+                ],
+                "synonyms": [
+                  "Mueren"
+                ]
+              },
+              {
+                "meaningID": "MOIEN1UNI1",
+                "number": 2,
+                "meaningVideo": "444581644",
+                "secondaryHeadword": "gudde Moien",
+                "targetLanguages": {
+                  "de": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "guten Morgen"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "guten Tag"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "Grußformel"
+                      }
+                    ]
+                  },
+                  "fr": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "bonjour"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "salutation"
+                      }
+                    ]
+                  },
+                  "en": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "good morning"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "good afternoon"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "hello"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "greeting"
+                      }
+                    ]
+                  },
+                  "pt": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "bom dia"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "boa tarde"
+                      },
+                      {
+                        "type": "semanticClarifier",
+                        "content": "forma de saudação"
+                      }
+                    ]
+                  }
+                },
+                "examples": [
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "gudde"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moien"
+                          },
+                          {
+                            "type": "word",
+                            "content": ",",
+                            "joinWithPreviousWord": true
+                          },
+                          {
+                            "type": "word",
+                            "content": "Madamm,"
+                          },
+                          {
+                            "type": "word",
+                            "content": "wat"
+                          },
+                          {
+                            "type": "word",
+                            "content": "kann"
+                          },
+                          {
+                            "type": "word",
+                            "content": "ech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "fir"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Iech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "maachen?"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/ee/ee04cddd4072d1d7a63aef7f1c667f6f.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/ee/ee04cddd4072d1d7a63aef7f1c667f6f.m4a"
+                    }
+                  }
+                ],
+                "synonyms": [
+                  "Bonjour"
+                ]
+              },
+              {
+                "meaningID": "MOIEN1UNI3",
+                "number": 3,
+                "secondaryHeadword": "Moie soen",
+                "targetLanguages": {
+                  "de": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "grüßen"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "Hallo sagen"
+                      }
+                    ]
+                  },
+                  "fr": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "dire bonjour (à)"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "saluer"
+                      }
+                    ]
+                  },
+                  "en": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "to say hello"
+                      }
+                    ]
+                  },
+                  "pt": {
+                    "parts": [
+                      {
+                        "type": "translation",
+                        "content": "cumprimentar"
+                      },
+                      {
+                        "type": "translation",
+                        "content": "saudar"
+                      }
+                    ]
+                  }
+                },
+                "examples": [
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "déi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "onfrëndlech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Vendeuse"
+                          },
+                          {
+                            "type": "word",
+                            "content": "huet"
+                          },
+                          {
+                            "type": "word",
+                            "content": "net"
+                          },
+                          {
+                            "type": "word",
+                            "content": "emol"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moie"
+                          },
+                          {
+                            "type": "word",
+                            "content": "gesot,"
+                          },
+                          {
+                            "type": "word",
+                            "content": "wéi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "mer"
+                          },
+                          {
+                            "type": "word",
+                            "content": "an"
+                          },
+                          {
+                            "type": "word",
+                            "content": "de"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Buttek"
+                          },
+                          {
+                            "type": "word",
+                            "content": "erakomm"
+                          },
+                          {
+                            "type": "word",
+                            "content": "sinn"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/b9/b9881d2ae5ff5cc59be180f799046790.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/b9/b9881d2ae5ff5cc59be180f799046790.m4a"
+                    }
+                  },
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "firwat"
+                          },
+                          {
+                            "type": "word",
+                            "content": "bass"
+                          },
+                          {
+                            "type": "word",
+                            "content": "de"
+                          },
+                          {
+                            "type": "word",
+                            "content": "mer"
+                          },
+                          {
+                            "type": "word",
+                            "content": "um"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Bal"
+                          },
+                          {
+                            "type": "word",
+                            "content": "net"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moie"
+                          },
+                          {
+                            "type": "word",
+                            "content": "soe"
+                          },
+                          {
+                            "type": "word",
+                            "content": "komm?"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/8c/8c19332b1baccd5d366345213c79cbc5.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/8c/8c19332b1baccd5d366345213c79cbc5.m4a"
+                    }
+                  },
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "déi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "zwee"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Bridder"
+                          },
+                          {
+                            "type": "word",
+                            "content": "soen"
+                          },
+                          {
+                            "type": "word",
+                            "content": "sech"
+                          },
+                          {
+                            "type": "word",
+                            "content": "zënter"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Joren"
+                          },
+                          {
+                            "type": "word",
+                            "content": "net"
+                          },
+                          {
+                            "type": "word",
+                            "content": "méi"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moien"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "gloss",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "déi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "zwee"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Bridder"
+                          },
+                          {
+                            "type": "word",
+                            "content": "schwätzen"
+                          },
+                          {
+                            "type": "word",
+                            "content": "zënter"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Joren"
+                          },
+                          {
+                            "type": "word",
+                            "content": "net"
+                          },
+                          {
+                            "type": "word",
+                            "content": "méi"
+                          },
+                          {
+                            "type": "word",
+                            "content": "mateneen"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/2e/2e451cfa67055720a87e3dd05e1e866d.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/2e/2e451cfa67055720a87e3dd05e1e866d.m4a"
+                    }
+                  },
+                  {
+                    "parts": [
+                      {
+                        "type": "text",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "mir"
+                          },
+                          {
+                            "type": "word",
+                            "content": "sinn"
+                          },
+                          {
+                            "type": "word",
+                            "content": "eiser"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Tatta"
+                          },
+                          {
+                            "type": "inflectedHeadword",
+                            "content": "Moie"
+                          },
+                          {
+                            "type": "word",
+                            "content": "soe"
+                          },
+                          {
+                            "type": "word",
+                            "content": "gaangen"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "gloss",
+                        "parts": [
+                          {
+                            "type": "word",
+                            "content": "mir"
+                          },
+                          {
+                            "type": "word",
+                            "content": "sinn"
+                          },
+                          {
+                            "type": "word",
+                            "content": "eis"
+                          },
+                          {
+                            "type": "word",
+                            "content": "Tatta"
+                          },
+                          {
+                            "type": "word",
+                            "content": "kuerz"
+                          },
+                          {
+                            "type": "word",
+                            "content": "besiche"
+                          },
+                          {
+                            "type": "word",
+                            "content": "gaangen"
+                          }
+                        ]
+                      }
+                    ],
+                    "hasInfobox": false,
+                    "audioFiles": {
+                      "ogg": "https://lod.lu/uploads/examples/OGG/d0/d0a97d205180b3bf3edc2930a01a12d8.ogg",
+                      "aac": "https://lod.lu/uploads/examples/AAC/d0/d0a97d205180b3bf3edc2930a01a12d8.m4a"
+                    }
+                  }
+                ],
+                "synonyms": [
+                  "Bonjour soen"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "audioString": "Moien, Moienter",
+    "audioFiles": {
+      "ogg": "https://lod.lu/uploads/OGG/moien1.ogg",
+      "aac": "https://lod.lu/uploads/AAC/moien1.m4a"
+    },
+    "allSynonyms": {
+      "synonymGroups": [
+        {
+          "number": 1,
+          "fromTerms": [
+            "Moien"
+          ],
+          "toSynonyms": [
+            {
+              "syn": "Mueren"
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "fromTerms": [
+            "gudde Moien"
+          ],
+          "toSynonyms": [
+            {
+              "syn": "Bonjour"
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "fromTerms": [
+            "Moie soen"
+          ],
+          "toSynonyms": [
+            {
+              "syn": "Bonjour soen"
+            }
+          ]
+        }
+      ]
+    },
+    "videos": [
+      {
+        "meaningID": "MOIEN1UNI2",
+        "meaningVideo": "444581668",
+        "meaningNumber": 1
+      },
+      {
+        "meaningID": "MOIEN1UNI1",
+        "meaningVideo": "444581644",
+        "meaningNumber": 2
+      }
+    ],
+    "infoboxes": {
+      "spelling": [
+        {
+          "label": "spelling",
+          "type": "freeFormText",
+          "content": {
+            "lb": [
+              {
+                "tag": "infoboxText",
+                "content": "Nieft"
+              },
+              {
+                "tag": "infoboxHighlight",
+                "content": "Moie soen"
+              },
+              {
+                "tag": "infoboxText",
+                "content": "kann een och"
+              },
+              {
+                "tag": "infoboxHighlight",
+                "content": "moie soen"
+              },
+              {
+                "tag": "infoboxText",
+                "content": "schreiwen."
+              }
+            ]
+          },
+          "concernsExample": false
+        }
+      ]
+    },
+    "categories": [
+      {
+        "label": "Schwätzt Dir Lëtzebuergesch? – Niveau A1 (Wuertschatz)",
+        "code": "GWS A1"
+      }
+    ]
+  },
+  "entryImage": "https://lod.lu/entry/MOIEN1/og_image.png",
+  "previousEntries": [
+    {
+      "lodID": "MOF1",
+      "lemma": "mof"
+    },
+    {
+      "lodID": "MOFELZEG1",
+      "lemma": "mofelzeg"
+    },
+    {
+      "lodID": "MOFF1",
+      "lemma": "Moff"
+    },
+    {
+      "lodID": "MOGADISCHU1",
+      "lemma": "Mogadischu"
+    },
+    {
+      "lodID": "MOGRIPP1",
+      "lemma": "Mogripp"
+    }
+  ],
+  "nextEntries": [
+    {
+      "lodID": "MOIEN2",
+      "lemma": "moien"
+    },
+    {
+      "lodID": "MOIES1",
+      "lemma": "moies"
+    },
+    {
+      "lodID": "MOIESIESSEN1",
+      "lemma": "Moiesiessen"
+    },
+    {
+      "lodID": "MOIESSTONNEN1",
+      "lemma": "Moiesstonnen"
+    },
+    {
+      "lodID": "MOKKA1",
+      "lemma": "Mokka"
+    }
+  ]
+}
