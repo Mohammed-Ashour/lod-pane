@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LOD pane</title>
+  <link rel="icon" href="/icon.png">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <button class="brand quiet" id="home" aria-label="Home"><img src="/icon.png" alt="" width="22" height="22">Home</button>
+    <nav aria-label="Pane"><button id="library" class="quiet" aria-pressed="false">Saved <span id="count">0</span></button>
+      <details id="settings"><summary>Settings</summary><div class="settings-panel">
+        <button id="theme" aria-label="Use dark theme">Dark theme</button>
+        <button id="refresh" hidden>Use document selection</button>
+        <p id="connection">Type a word to start.</p>
+      </div></details>
+    </nav>
+  </header>
+  <form id="search" role="search">
+    <label class="sr-only" for="query">Luxembourgish word</label>
+    <input id="query" maxlength="80" autocomplete="off" placeholder="Search Luxembourgish…" required>
+    <button type="submit" aria-label="Look up word" title="Look up word"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg></button>
+  </form>
+  <p id="status" role="status" aria-live="polite"></p>
+  <main id="lookup-view">
+    <section id="empty"><h1>Select a word.</h1><p>Select a Luxembourgish word in your document, or search above.</p></section>
+    <section id="candidates" hidden><h1>Which word?</h1><p class="hint">Choose the dictionary entry you meant.</p><div id="candidate-list"></div></section>
+    <section id="entry" hidden aria-label="Dictionary entry">
+      <h1 id="headword" lang="lb" tabindex="-1"></h1>
+      <div class="entry-meta"><p id="pos"></p><label class="language-row"><span class="sr-only">Translation language</span><select id="language" aria-label="Translation language"><option value="en">English</option><option value="fr">Français</option><option value="de">Deutsch</option></select></label></div>
+      <p id="meaning"></p>
+      <p id="missing-translation" hidden>No translation in this language. Try another language or meaning.</p>
+      <div id="grammar-block"><h2 class="sr-only">Grammar</h2><p id="grammar" lang="lb"></p></div>
+      <div id="example-block"><h2>Example</h2><p id="example" lang="lb"></p></div>
+      <label id="sense-row" hidden><span>Meaning</span><select id="sense" aria-label="Choose a meaning"></select></label>
+      <div class="learning-tools">
+        <details id="replace-details" hidden><summary>Replace selected text</summary>
+          <p class="hint">Uses the Luxembourgish headword, not the translation. Check the grammar first.</p>
+          <div id="replace-preview" hidden><h2>Selected text</h2><p id="replace-before"></p><h2>Replace with</h2><p id="replace-after" lang="lb"></p></div>
+          <p id="replace-status" class="hint" role="status"></p><button id="replace-confirm" disabled>Replace selection</button>
+        </details>
+        <details id="note-details"><summary><span id="note-label">Add a note</span><span id="note-state" class="detail-state"></span></summary>
+          <label class="sr-only" for="note">My note</label><textarea id="note" rows="3" maxlength="2000" placeholder="A memory cue or a phrase…"></textarea>
+          <p class="hint">Saved with the word. Unsaved notes last until you close the pane.</p>
+        </details>
+        <details id="context-details"><summary>Document excerpt<span id="context-state" class="detail-state"></span></summary>
+          <label class="context-option"><input id="keep-context" type="checkbox">Keep a nearby paragraph with this word</label>
+          <p id="context-hint" class="hint">Optional. Only the lookup word goes to LOD.</p><p id="context" lang="lb" hidden></p>
+        </details>
+      </div>
+      <a id="source" target="_blank" rel="noopener noreferrer">View on LOD <span aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+  <section id="saved-view" hidden aria-label="Saved vocabulary">
+    <div class="saved-title"><h1>Your vocabulary</h1><button id="back" class="quiet">Back</button></div>
+    <label class="sr-only" for="saved-query">Find a saved word or note</label><input id="saved-query" type="search" placeholder="Find a word or note…" autocomplete="off">
+    <p id="saved-summary" class="hint" role="status"></p><div id="saved-list"></div>
+    <button id="export" class="quiet">Export vocabulary</button><p class="hint">Stored by this installation. Export a copy for backup.</p>
+  </section>
+  <footer id="capture" hidden>
+    <div class="save-row"><button id="save" class="primary">Save to Study</button><label class="sr-only" for="destination">Save destination</label><select id="destination" aria-label="Save destination"><option>Study</option><option>Favorites</option></select></div>
+    <p id="save-status" aria-live="polite">Saving vocabulary does not edit your document.</p>
+  </footer>
+  <div id="toast" role="status" hidden><span id="toast-text"></span><button id="undo">Undo</button></div>
+</body>
+</html>
