@@ -1,5 +1,6 @@
 """Copy bundled Python and build dependency licenses next to the frozen app."""
 from importlib import metadata
+import os
 from pathlib import Path
 import re
 import shutil
@@ -56,6 +57,8 @@ def python_license(destination):
 
 
 def main():
+    if sys.platform == "darwin" and "SSL_CERT_FILE" not in os.environ and Path("/etc/ssl/cert.pem").is_file():
+        os.environ["SSL_CERT_FILE"] = "/etc/ssl/cert.pem"
     if len(sys.argv) != 2:
         raise SystemExit("usage: copy_licenses.py APP_RESOURCES_DIRECTORY")
     destination = Path(sys.argv[1])

@@ -24,6 +24,14 @@ ADDIN_ID = "ad0b38c2-5f64-4d1e-9978-a1ea27d53814"
 DEVELOPER_KEY = r"Software\Microsoft\Office\16.0\WEF\Developer"
 
 
+def configure_tls():
+    # A frozen macOS Python must not depend on the build machine's Python CA path.
+    # Honor an administrator-provided CA bundle; otherwise use macOS's system bundle.
+    system_ca = Path("/etc/ssl/cert.pem")
+    if sys.platform == "darwin" and "SSL_CERT_FILE" not in os.environ and system_ca.is_file():
+        os.environ["SSL_CERT_FILE"] = str(system_ca)
+
+
 def resources():
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
 
@@ -258,6 +266,7 @@ def serve(directory):
 
 def self_test():
     """Exercise the frozen runtime and real TLS without changing OS trust/settings."""
+    assert ssl.create_default_context().cert_store_stats()["x509_ca"] > 0, "No trusted roots for LOD HTTPS"
     with TemporaryDirectory(prefix="lod-native-package-") as temporary:
         directory = Path(temporary)
         certificates(directory)
@@ -291,6 +300,7 @@ def self_test():
 
 
 def main():
+    configure_tls()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", nargs="?", choices=("install", "start", "stop", "status", "uninstall", "run", "serve"))
     parser.add_argument("--install-dir", type=Path, default=manager.default_directory())
