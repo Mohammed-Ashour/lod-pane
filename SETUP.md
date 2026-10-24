@@ -109,6 +109,16 @@ wizard offers to launch setup when installation finishes. On macOS, open
 certificate and background startup when prompted. Restart Word and open
 **Home > Add-ins > LOD pane**.
 
+On macOS, setup also opens a folder picker for Word's add-in registration.
+Select Word's **Documents** folder shown there, or its existing **wef** folder,
+and choose **Allow Access**. This permits the setup helper to read/write only
+`wef/lod-pane.xml`; it does not require Full Disk Access. If the picker opens
+elsewhere, press **Cmd+Shift+G** and enter
+`~/Library/Containers/com.microsoft.Word/Data/Documents/`, then select that folder.
+If it does not exist, open Word once, quit Word, and retry setup. Removal asks
+for the same scoped permission. Cancelling leaves the current installation
+unchanged.
+
 The native packages include the runtime. Python and Node.js are not required.
 The companion binds only to `127.0.0.1:43127` and runs in the background through
 a per-user login entry. No terminal needs to remain open. Word development
@@ -285,6 +295,7 @@ acceptance.
 | --- | --- |
 | Word pane is blank | Start `python3 server.py`, confirm the development certificate, and check local-network policy. |
 | Installed Word companion is unavailable | Run `status-word`, inspect `companion.log`, then run `start-word`. Re-run setup if Python moved or the certificate expired. |
+| macOS setup reports Operation not permitted for Word's `Documents/wef` folder | Install a current PKG and grant the Word folder through its native picker. Older builds attempted direct access and could be blocked by macOS app-data protection. |
 | Word add-in is missing | Restart Word and verify the manifest location or catalog. |
 | Writer sidebar is blank | Reinstall the extension, fully restart LibreOffice, and inspect `panel-error.log` in the data folder. |
 | Writer shows an old layout | Remove the cached extension and confirm `v0.7.0` in Settings. |

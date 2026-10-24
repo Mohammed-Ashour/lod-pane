@@ -4,6 +4,10 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 python -m pip install pyinstaller==6.16.0 cryptography==43.0.3
+mkdir -p dist/native-macos
+swiftc -target arm64-apple-macos12.0 -module-cache-path dist/native-swift-cache tools/native/word_folder_access.swift -o dist/native-macos/word-folder-access
+codesign --force --sign - dist/native-macos/word-folder-access
+dist/native-macos/word-folder-access --self-test
 python tests/test_native_word.py
 python -m PyInstaller \
   --noconfirm \
@@ -17,11 +21,26 @@ python -m PyInstaller \
   --workpath dist/native-build \
   --copy-metadata cryptography \
   --copy-metadata cffi \
+  --add-binary "dist/native-macos/word-folder-access:macos" \
   --add-data "word:word" \
   --add-data "SETUP.md:." \
   --add-data "dist/word-manifest.xml:dist" \
   tools/native_word.py
 
+python - <<'PY'
+from pathlib import Path
+import plistlib
+
+info = Path("dist/LOD-pane-Word.app/Contents/Info.plist")
+with info.open("rb") as source:
+    values = plistlib.load(source)
+values["NSAppDataUsageDescription"] = (
+    "LOD pane Word needs access to the Word add-in folder you select to install "
+    "or remove its manifest."
+)
+with info.open("wb") as target:
+    plistlib.dump(values, target)
+PY
 python tools/native/copy_licenses.py dist/LOD-pane-Word.app/Contents/Resources
 codesign --force --deep --sign - dist/LOD-pane-Word.app
 if ! dist/LOD-pane-Word.app/Contents/MacOS/LOD-pane-Word --self-test --no-dialog; then

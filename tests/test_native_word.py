@@ -70,11 +70,66 @@ def run():
                 raise AssertionError("startup failure hidden")
             except RuntimeError as error:
                 assert "port occupied" in str(error)
-            register.assert_called_once_with(failed, True)
-            restore.assert_called_once_with(None)
+            register.assert_called_once_with(failed, True, None)
+            restore.assert_called_once_with(None, None)
             assert [call.args[1] for call in trust.call_args_list] == [True, False]
             assert not (failed / "native-installed").exists()
             assert not (failed / "certificates/ca.crt").exists()
+
+        # Protected Word paths are touched only by the process with the picker grant.
+        class FolderAccess:
+            def __init__(self):
+                self.value = b"previous manifest"
+                self.actions = []
+            def request(self, action, data=None):
+                self.actions.append(action)
+                if action == "read": return self.value
+                if action in ("write", "restore"): self.value = data
+                elif action == "remove" and self.value == data: self.value = None
+        access = FolderAccess()
+        scoped = directory / "scoped"
+        scoped.mkdir()
+        with patch.object(native.Path, "home", side_effect=PermissionError("protected Word container")):
+            assert native.registration_snapshot(access) == b"previous manifest"
+            native.register_manifest(scoped, True, access)
+            assert access.value == (ROOT / "dist/word-manifest.xml").read_bytes()
+            native.restore_registration(b"previous manifest", access)
+            assert access.value == b"previous manifest"
+        assert access.actions == ["read", "write", "restore"]
+        (scoped / "word-manifest.xml").unlink()
+        access.value = (ROOT / "dist/word-manifest.xml").read_bytes()
+        native.register_manifest(scoped, False, access)
+        assert access.value is None, "Uninstall must use the bundled manifest when its local copy is absent"
+
+        access = FolderAccess()
+        with patch.object(native, "trust_ca"), \
+             patch.object(native.manager, "startup_enabled", return_value=False), \
+             patch.object(native.manager, "running", return_value=False), \
+             patch.object(native.manager, "stop"), patch.object(native.manager, "login_startup"), \
+             patch.object(native.manager, "start", side_effect=RuntimeError("port occupied")), \
+             patch.object(native.Path, "home", side_effect=PermissionError("protected Word container")):
+            try:
+                native.install(scoped, access)
+                raise AssertionError("startup failure hidden")
+            except RuntimeError as error:
+                assert "port occupied" in str(error)
+        assert access.actions == ["read", "write", "restore"]
+        assert access.value == b"previous manifest"
+
+        # Cancelling the picker happens before registration, trust or service changes.
+        cancelled = directory / "cancelled"
+        cancelled.mkdir()
+        (cancelled / "native-installed").write_text("existing installation")
+        from unittest.mock import MagicMock
+        scope = MagicMock()
+        scope.__enter__.side_effect = RuntimeError("Word folder access cancelled.")
+        with patch.object(native.sys, "argv", ["native", "install", "--no-dialog", "--install-dir", str(cancelled)]), \
+             patch.object(native, "manifest_access", return_value=scope), \
+             patch.object(native, "install") as install, patch.object(native.manager, "stop") as stop:
+            assert native.main() == 1
+            install.assert_not_called()
+            stop.assert_not_called()
+        assert (cancelled / "native-installed").read_text() == "existing installation"
 
     print("PASS: unique native CA/leaf generation, CA private-key disposal, reuse, manifest ownership, and frozen lifecycle/TLS paths.")
 

@@ -1,7 +1,10 @@
 """Bundled Word companion: first-run setup, native management and background service."""
 import argparse
+import base64
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 import ipaddress
+import json
 import os
 from pathlib import Path
 import shutil
@@ -22,6 +25,73 @@ import server
 
 ADDIN_ID = "ad0b38c2-5f64-4d1e-9978-a1ea27d53814"
 DEVELOPER_KEY = r"Software\Microsoft\Office\16.0\WEF\Developer"
+
+
+class MacManifestAccess:
+    """One folder-picker grant, held by the native helper through setup/rollback."""
+    def __init__(self):
+        self.child = None
+
+    def __enter__(self):
+        helper = resources() / "macos/word-folder-access"
+        self.child = subprocess.Popen([str(helper)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE, text=True, encoding="utf-8")
+        try:
+            self._reply()
+        except Exception:
+            self.close()
+            raise
+        return self
+
+    def _reply(self):
+        line = self.child.stdout.readline()
+        if not line:
+            raise RuntimeError("The Word folder picker closed before granting access. Run setup again and select Word's Documents or wef folder.")
+        result = json.loads(line)
+        if not result.get("ok"):
+            raise RuntimeError(result.get("error", "Word folder access was not granted."))
+        return result
+
+    def request(self, action, data=None):
+        message = {"action": action}
+        if action in ("write", "remove", "restore"):
+            message["data"] = None if data is None else base64.b64encode(data).decode("ascii")
+        self.child.stdin.write(json.dumps(message) + "\n")
+        self.child.stdin.flush()
+        result = self._reply()
+        if action == "read":
+            return None if result.get("data") is None else base64.b64decode(result["data"], validate=True)
+
+    def close(self):
+        if self.child is None:
+            return
+        try:
+            if self.child.poll() is None:
+                self.child.stdin.write('{"action":"quit"}\n')
+                self.child.stdin.flush()
+                self.child.wait(timeout=5)
+        except (OSError, subprocess.TimeoutExpired):
+            if self.child.poll() is None:
+                try:
+                    self.child.kill()
+                except ProcessLookupError:
+                    pass
+            self.child.wait()
+        finally:
+            for stream in (self.child.stdin, self.child.stdout, self.child.stderr):
+                stream.close()
+
+    def __exit__(self, *args):
+        self.close()
+
+
+@contextmanager
+def manifest_access():
+    if sys.platform == "darwin" and getattr(sys, "frozen", False):
+        with MacManifestAccess() as access:
+            yield access
+    else:
+        yield None
 
 
 def configure_tls():
@@ -140,11 +210,17 @@ def trust_ca(path, enable):
     subprocess.run(args, check=True, capture_output=True)
 
 
-def register_manifest(directory, enable):
+def register_manifest(directory, enable, access=None):
     manifest = directory / "word-manifest.xml"
     if enable:
         shutil.copy2(resources() / "dist/word-manifest.xml", manifest)
-    if sys.platform == "win32":
+    if access is not None:
+        if enable:
+            access.request("write", manifest.read_bytes())
+        else:
+            expected = manifest.read_bytes() if manifest.is_file() else (resources() / "dist/word-manifest.xml").read_bytes()
+            access.request("remove", expected)
+    elif sys.platform == "win32":
         import winreg
         with winreg.CreateKey(winreg.HKEY_CURRENT_USER, DEVELOPER_KEY) as key:
             if enable:
@@ -166,7 +242,9 @@ def register_manifest(directory, enable):
         manifest.unlink(missing_ok=True)
 
 
-def registration_snapshot():
+def registration_snapshot(access=None):
+    if access is not None:
+        return access.request("read")
     if sys.platform == "win32":
         import winreg
         try:
@@ -178,8 +256,10 @@ def registration_snapshot():
     return target.read_bytes() if target.is_file() else None
 
 
-def restore_registration(state):
-    if sys.platform == "win32":
+def restore_registration(state, access=None):
+    if access is not None:
+        access.request("restore", state)
+    elif sys.platform == "win32":
         import winreg
         with winreg.CreateKey(winreg.HKEY_CURRENT_USER, DEVELOPER_KEY) as key:
             if state is None:
@@ -198,11 +278,11 @@ def restore_registration(state):
             target.write_bytes(state)
 
 
-def install(directory):
+def install(directory, access=None):
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     marker = directory / "native-installed"
     prior_marker = marker.read_bytes() if marker.is_file() else None
-    prior_registration = registration_snapshot()
+    prior_registration = registration_snapshot(access)
     prior_manifest = (directory / "word-manifest.xml").read_bytes() if (directory / "word-manifest.xml").is_file() else None
     prior_certificates = {name: (directory / "certificates" / name).read_bytes()
                           for name in ("ca.crt", "localhost.crt", "localhost.key")
@@ -217,13 +297,13 @@ def install(directory):
         certificates(directory)
         trust_ca(directory / "certificates/ca.crt", True)
         trusted = True
-        register_manifest(directory, True)
+        register_manifest(directory, True, access)
         manager.login_startup(directory, True)
         manager.start(directory)
     except Exception:
         manager.login_startup(directory, False)
         manager.stop(directory)
-        restore_registration(prior_registration)
+        restore_registration(prior_registration, access)
         if trusted and (prior_marker is None or prior_certificates.get("ca.crt") != (directory / "certificates/ca.crt").read_bytes()):
             trust_ca(directory / "certificates/ca.crt", False)
         if prior_manifest is None:
@@ -247,10 +327,10 @@ def install(directory):
     marker.write_text(sys.executable, encoding="utf-8")
 
 
-def uninstall(directory):
+def uninstall(directory, access=None):
     manager.login_startup(directory, False)
     manager.stop(directory)
-    register_manifest(directory, False)
+    register_manifest(directory, False, access)
     for path in (directory / "certificates").glob("*ca.crt"):
         trust_ca(path, False)
     (directory / "native-installed").unlink(missing_ok=True)
@@ -267,6 +347,8 @@ def serve(directory):
 def self_test():
     """Exercise the frozen runtime and real TLS without changing OS trust/settings."""
     assert ssl.create_default_context().cert_store_stats()["x509_ca"] > 0, "No trusted roots for LOD HTTPS"
+    if sys.platform == "darwin":
+        subprocess.run([str(resources() / "macos/word-folder-access"), "--self-test"], check=True, timeout=15)
     with TemporaryDirectory(prefix="lod-native-package-") as temporary:
         directory = Path(temporary)
         certificates(directory)
@@ -341,11 +423,13 @@ def main():
                 if action == "install":
                     if not silent and not dialog("Install LOD pane for Word?\n\nThis trusts a certificate for the local HTTPS companion, registers the Word add-in, and starts a background companion at sign-in. Your vocabulary stays local. Close Word before continuing.", question=True):
                         return 1
-                    install(directory)
+                    with manifest_access() as access:
+                        install(directory, access)
                 elif action == "uninstall":
                     if not silent and not dialog("Remove Word registration, login startup and this companion's local certificate trust? Vocabulary is retained.", question=True):
                         return 1
-                    uninstall(directory)
+                    with manifest_access() as access:
+                        uninstall(directory, access)
                 elif action == "status":
                     if not manager.running(directory):
                         raise RuntimeError("Companion is stopped.")

@@ -99,6 +99,8 @@ Download `lod-pane-word-windows-x64.exe` for Windows or
 installer. On macOS, open **LOD-pane-Word** from Applications after installation.
 Complete the one-time localhost certificate approval. No separate Python or
 Node.js installation is required.
+On macOS, select Word's **Documents** or **wef** folder when setup asks for
+**Allow Access**, so it can register the add-in.
 
 Setup registers the development manifest and runs the local HTTPS companion in
 the background, including at future sign-ins. Restart Word and open
