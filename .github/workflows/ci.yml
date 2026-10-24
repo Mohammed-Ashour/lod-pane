@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check Python syntax
+        run: >-
+          python3 -m py_compile
+          lodpane.py
+          server.py
+          tools/build.py
+          tools/install_word.py
+          tests/test_runtime.py
+          tests/libreoffice-runtime.py
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check word/app.js
+          node --check tests/word-runtime.cjs
+          node --check tests/prototypes.cjs
+          node --check tests/learner-prototypes.cjs
+
+      - name: Run core, HTTP, and package tests
+        run: python3 tests/test_runtime.py
+
+  browser:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build packages
+        run: python3 tools/build.py
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run browser checks
+        env:
+          PLAYWRIGHT_CHANNEL: chromium
+        run: |
+          node tests/word-runtime.cjs
+          node tests/prototypes.cjs
+          node tests/learner-prototypes.cjs
+
+      - name: Validate Word manifest
+        run: npx --yes office-addin-manifest@3.0.1 validate dist/word-manifest.xml
+
+  libreoffice:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install LibreOffice
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreoffice-writer python3-uno xvfb
+
+      - name: Run native sidebar probe
+        run: xvfb-run -a python3 tests/libreoffice-runtime.py
