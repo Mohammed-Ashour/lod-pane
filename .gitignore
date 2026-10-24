@@ -1,0 +1,6 @@
+.DS_Store
+.certificates/
+__pycache__/
+*.py[cod]
+dist/
+node_modules/
