@@ -1,4 +1,4 @@
-"""Copy bundled Python and build dependency licenses next to the frozen app."""
+"""Copy the project and bundled dependency licenses next to the frozen app."""
 from importlib import metadata
 import os
 from pathlib import Path
@@ -63,6 +63,7 @@ def main():
         raise SystemExit("usage: copy_licenses.py APP_RESOURCES_DIRECTORY")
     destination = Path(sys.argv[1])
     destination.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(Path(__file__).resolve().parents[2] / "LICENSE", destination / "LICENSE")
 
     notices = ["Third-party notices for LOD pane Word.", ""]
     python_path = python_license(destination)

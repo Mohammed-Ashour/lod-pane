@@ -40,6 +40,7 @@ def run():
                 if suffix == "command":
                     assert archive.getinfo(name).external_attr >> 16 & 0o111
             assert "lod-pane-word/tools/install_word.py" in names
+            assert archive.read("lod-pane-word/LICENSE") == (ROOT / "LICENSE").read_bytes()
             assert not any("certificate" in name or name.endswith((".key", ".sqlite3")) for name in names)
             assert "lod-pane-word/install-word." + ("cmd" if suffix == "command" else "command") not in names
 
@@ -100,12 +101,14 @@ def run():
         (directory / "dist").mkdir()
         (directory / "dist/word-manifest.xml").write_text("manifest")
         (directory / "vocabulary.sqlite3").write_text("retained")
+        (directory / "LICENSE").write_bytes((ROOT / "LICENSE").read_bytes())
         with patch.object(installer, "office_tool") as office, \
              patch.object(installer, "login_startup") as startup:
             installer.uninstall(directory)
             office.assert_called_once_with("office-addin-dev-settings@4.0.1", "unregister", directory / "dist/word-manifest.xml")
             startup.assert_called_once_with(directory, False)
         assert (directory / "vocabulary.sqlite3").read_text() == "retained"
+        assert (directory / "LICENSE").read_bytes() == (ROOT / "LICENSE").read_bytes()
         assert not (directory / "server.py").exists()
 
         (directory / "dist/word-manifest.xml").write_text("manifest")
@@ -127,6 +130,7 @@ def run():
              patch.object(installer, "start"), patch.object(installer, "stop"):
             installer.install(directory)
             assert (directory / "server.py").read_bytes() == (ROOT / "server.py").read_bytes()
+            assert (directory / "LICENSE").read_bytes() == (ROOT / "LICENSE").read_bytes()
             assert office.call_count == 2
         (directory / "server.py").write_text("previous version")
         with patch.object(installer, "office_tool", side_effect=[None, RuntimeError("registration failed"), None]), \

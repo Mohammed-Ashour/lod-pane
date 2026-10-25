@@ -203,3 +203,9 @@ JavaScript boundary. They do not prove that the add-in works in real Word.
 
 - [Setup and host installation](SETUP.md)
 - [Architecture](ARCHITECTURE.md)
+
+## License
+
+This project's original code is available under the [MIT License](LICENSE).
+Third-party libraries and LOD dictionary content, including the test fixtures,
+retain their respective rights and terms.

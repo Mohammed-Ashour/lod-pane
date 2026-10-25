@@ -16,7 +16,7 @@ from urllib.request import urlopen
 
 LABEL = "org.lodpane.word"
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-PAYLOAD = ("server.py", "lodpane.py", "SETUP.md", "word/index.html", "word/app.js",
+PAYLOAD = ("LICENSE", "server.py", "lodpane.py", "SETUP.md", "word/index.html", "word/app.js",
            "word/style.css", "word/icon.png", "dist/word-manifest.xml", "tools/install_word.py")
 
 
@@ -287,7 +287,7 @@ def uninstall(directory):
         office_tool("office-addin-dev-settings@4.0.1", "unregister", manifest)
     # Keep the manager available while this process is running, especially on Windows.
     for name in PAYLOAD:
-        if name != "tools/install_word.py":
+        if name not in ("tools/install_word.py", "LICENSE"):
             (directory / name).unlink(missing_ok=True)
     print("Uninstalled startup and manifest. Vocabulary and shared development certificates are retained.")
     print("Logs and the inactive management script remain at " + str(directory))

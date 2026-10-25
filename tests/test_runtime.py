@@ -151,6 +151,7 @@ def run():
     spec = importlib.util.spec_from_file_location("builder", ROOT / "tools/build.py")
     builder = importlib.util.module_from_spec(spec); spec.loader.exec_module(builder); builder.main()
     with ZipFile(ROOT / "dist/lod-pane.oxt") as archive:
+        assert archive.read("LICENSE") == (ROOT / "LICENSE").read_bytes()
         assert "pythonpath/lodpane.py" in archive.namelist()
         import struct
         assert struct.unpack(">II", archive.read("sidebar-icon.png")[16:24]) == (24, 24)
@@ -167,7 +168,7 @@ def run():
     assert manifest.find("o:Permissions", ns).text == "ReadWriteDocument"
     assert manifest.find("o:DefaultSettings/o:SourceLocation", ns).attrib["DefaultValue"].endswith("/word.html")
     with ZipFile(ROOT / "dist/lod-pane-word.zip") as archive:
-        expected = {"server.py", "lodpane.py", "SETUP.md", "START-HERE.txt", "tools/install_word.py",
+        expected = {"LICENSE", "server.py", "lodpane.py", "SETUP.md", "START-HERE.txt", "tools/install_word.py",
                     "word/index.html", "word/app.js", "word/style.css", "word/icon.png",
                     "dist/word-manifest.xml", "dist/start-word.command", "dist/start-word.cmd"}
         wrappers = {action + "-word." + suffix for action in ("install", "start", "stop", "status", "uninstall")

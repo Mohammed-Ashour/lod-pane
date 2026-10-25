@@ -30,6 +30,7 @@ def main():
     image = icon()
     (ROOT / "word/icon.png").write_bytes(image)
     files = {
+        "LICENSE": (ROOT / "LICENSE").read_bytes(),
         "panel.py": (ROOT / "libreoffice/panel.py").read_bytes(),
         "pythonpath/lodpane.py": (ROOT / "lodpane.py").read_bytes(),
         "sidebar-icon.png": icon(24),
@@ -74,7 +75,7 @@ def main():
     launcher.chmod(0o755)
     (DIST / "start-word.cmd").write_text('@echo off\r\ncd /d "%~dp0.."\r\npy -3 server.py\r\npause\r\n', encoding="utf-8")
     # Preserve the source layout so the existing launchers and /help route work.
-    payload = ("server.py", "lodpane.py", "SETUP.md", "word/index.html",
+    payload = ("LICENSE", "server.py", "lodpane.py", "SETUP.md", "word/index.html",
                "word/app.js", "word/style.css", "word/icon.png", "tools/install_word.py",
                "dist/word-manifest.xml", "dist/start-word.command", "dist/start-word.cmd")
     wrappers = {}
