@@ -102,6 +102,30 @@ Node.js installation is required.
 On macOS, select Word's **Documents** or **wef** folder when setup asks for
 **Allow Access**, so it can register the add-in.
 
+In the folder picker, click inside the window, press **Cmd+Shift+G**, paste
+this path into the **Go to Folder** box, and press **Return**:
+
+```text
+~/Library/Containers/com.microsoft.Word/Data/Documents/
+```
+
+Select that **Documents** folder and click **Allow Access**. The `~` stands for
+your home folder. For example, for a macOS account named `alex`, the full path is:
+
+```text
+/Users/alex/Library/Containers/com.microsoft.Word/Data/Documents/
+```
+
+You can also select the existing `wef` subfolder directly:
+
+```text
+~/Library/Containers/com.microsoft.Word/Data/Documents/wef/
+```
+
+Word uses `wef` to discover locally registered add-ins. Setup creates it if
+needed and writes `lod-pane.xml` there. If Word's internal **Documents** folder
+does not exist, open Word once, quit it, and retry setup.
+
 Setup registers the development manifest and runs the local HTTPS companion in
 the background, including at future sign-ins. Restart Word and open
 **Home > Add-ins > LOD pane**. Open the installed app to start, stop, or uninstall
