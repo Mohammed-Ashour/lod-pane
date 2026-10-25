@@ -41,8 +41,8 @@ def main():
         (basic / "Standard/script.xlb").write_text('''<?xml version="1.0"?><library:library xmlns:library="http://openoffice.org/2000/library" library:name="Standard" library:readonly="false" library:passwordprotected="false"><library:element library:name="LODTest"/></library:library>''')
         extension = temporary / "extension"
         with ZipFile(ROOT / "dist/lod-pane.oxt") as archive:
-            assert '<version value="0.7.0"/>' in archive.read("description.xml").decode()
-            assert 'VERSION = "v0.7.0"' in archive.read("panel.py").decode()
+            assert '<version value="0.8.0"/>' in archive.read("description.xml").decode()
+            assert 'VERSION = "v0.8.0"' in archive.read("panel.py").decode()
             archive.extractall(extension)
         # Replace only external dictionary I/O in the temporary extracted package.
         # All controls, listeners, factory, core parser and SQLite code are real.
@@ -156,15 +156,22 @@ If Not root.getControl("search").getModel().Tabstop Then Call CheckFailed(stage,
 If Not root.getControl("lang_en").getModel().Toggle Then Call CheckFailed(stage, 1045)
 If Not root.getControl("save").getModel().supportsService("com.sun.star.awt.UnoControlButtonModel") Then Call CheckFailed(stage, 1050)
 If Not root.getControl("save").getModel().Tabstop Then Call CheckFailed(stage, 1051)
-Dim wordFont As Single
+Dim wordFont As Single, meaningFont As Single
 wordFont = root.getControl("word").getModel().FontHeight
-If wordFont < 14 Or wordFont > 18 Then Call CheckFailed(stage, 1020)
+meaningFont = root.getControl("meaning").getModel().FontHeight
+If wordFont <> 22 Then Call CheckFailed(stage, 1020)
+If root.getControl("word").getModel().FontName <> "Georgia" Then Call CheckFailed(stage, 1023)
+If meaningFont <> 15 Then Call CheckFailed(stage, 1024)
+If root.getControl("meaning").getModel().FontWeight <> 150 Then Call CheckFailed(stage, 1025)
 Dim searchRect As New com.sun.star.awt.Rectangle
-Dim queryRect As New com.sun.star.awt.Rectangle
 searchRect = root.getControl("search").getPosSize()
-queryRect = root.getControl("query").getPosSize()
-If searchRect.Height <> queryRect.Height Then Call CheckFailed(stage, 1021)
-If root.getControl("save").getPosSize().Height > 32 Then Call CheckFailed(stage, 1022)
+If searchRect.Width <> 72 Or searchRect.Height <> 30 Then Call CheckFailed(stage, 1021)
+If searchRect.Height < 28 Or root.getControl("search").getModel().Label = "" Then Call CheckFailed(stage, 1026)
+If root.getControl("save").getPosSize().Height > 36 Then Call CheckFailed(stage, 1022)
+If root.getControl("source").getModel().BackgroundColor <> root.getModel().BackgroundColor Then Call CheckFailed(stage, 1027)
+If root.getControl("query").getModel().TextColor = root.getModel().BackgroundColor Then Call CheckFailed(stage, 1028)
+If root.getControl("query").getModel().BorderColor <> 14082792 Then Call CheckFailed(stage, 1125)
+If root.getControl("query").getPeer().getProperty("NativeWidgetLook") Then Call CheckFailed(stage, 1126)
 Dim langRect As New com.sun.star.awt.Rectangle
 langRect = root.getControl("lang_en").getPosSize()
 If langRect.Width < 60 Then Call CheckFailed(stage, 1034)
@@ -205,11 +212,14 @@ toolkit.keyRelease(keyEvent)
 Wait 100
 DoEvents
 If Not root.getControl("version").isVisible() Then Call CheckFailed(stage, 1054)
-If root.getControl("version").getModel().Label <> "v0.7.0" Then Call CheckFailed(stage, 1055)
+If root.getControl("version").getModel().Label <> "v0.8.0" Then Call CheckFailed(stage, 1055)
 action.Source = root.getControl("theme")
 panel.actionPerformed(action)
 If root.getControl("theme").getModel().Label <> "Use light theme" Then Call CheckFailed(stage, 1004)
 If root.getModel().BackgroundColor <> 1121582 Then Call CheckFailed(stage, 1046)
+If root.getControl("source").getModel().BackgroundColor <> root.getModel().BackgroundColor Then Call CheckFailed(stage, 1029)
+If root.getControl("query").getModel().TextColor = root.getModel().BackgroundColor Then Call CheckFailed(stage, 1030)
+If root.getControl("query").getModel().BorderColor <> 2834517 Then Call CheckFailed(stage, 1127)
 If root.getControl("note").getText() <> "Native notebook note." Then Call CheckFailed(stage, 1005)
 action.Source = root.getControl("context")
 panel.actionPerformed(action)
@@ -285,12 +295,18 @@ Dim lintReport As String
 Dim controls As Variant, widths As Variant
 Dim a As Integer, b As Integer, w As Integer
 controls = root.getControls()
-widths = Array(288, 336, 1000)
+widths = Array(272, 288, 336, 1000)
 Call ClickOnce(root, "meanings")
 For w = 0 To UBound(widths)
+ panel.Window.setPosSize(0, 0, widths(w), 1800, 15)
+ Call ClickOnce(root, "lang_en")
+ If root.getControl("search").getPosSize().X + root.getControl("search").getPosSize().Width > widths(w) Then Call CheckFailed("action refresh clipped beside sidebar scrollbar", 1129)
  size = panel.getHeightForWidth(widths(w))
  For a = 0 To UBound(controls)
   If controls(a).getModel().supportsService("com.sun.star.awt.UnoControlListBoxModel") Or controls(a).getModel().supportsService("com.sun.star.awt.UnoControlFixedHyperlinkModel") Then Call CheckFailed(stage, 1093)
+  If controls(a).isVisible() Then
+   If controls(a).getPosSize().X < 0 Or controls(a).getPosSize().X + controls(a).getPosSize().Width > widths(w) Then Call CheckFailed("control clipped beside sidebar scrollbar", 1128)
+  End If
   For b = a + 1 To UBound(controls)
    Dim ra As New com.sun.star.awt.Rectangle
    Dim rb As New com.sun.star.awt.Rectangle

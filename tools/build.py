@@ -35,7 +35,7 @@ def main():
         "sidebar-icon.png": icon(24),
         "description.xml": b'''<?xml version="1.0" encoding="UTF-8"?>
 <description xmlns="http://openoffice.org/extensions/description/2006" xmlns:xlink="http://www.w3.org/1999/xlink">
-<identifier value="org.lodpane.Notebook"/><version value="0.7.0"/>
+<identifier value="org.lodpane.Notebook"/><version value="0.8.0"/>
 <display-name><name lang="en">LOD pane</name></display-name>
 <dependencies><LibreOffice-minimal-version xmlns="http://libreoffice.org/extensions/description/2011" value="7.4"/></dependencies>
 </description>''',

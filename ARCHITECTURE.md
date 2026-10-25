@@ -79,8 +79,10 @@ phase. Packages remain unsigned and macOS packages are not notarized.
 Core/HTTP/package tests, fixture-backed Word browser tests, installer tests,
 compiled Swift checks and frozen HTTPS smoke tests run locally or in CI. The
 native Writer probe covers controls, selection, saving, replacement/Undo and
-layout in a disposable profile. Installed Writer lookup, meaning changes and
-Favorites saving were also checked on macOS; README media records that session.
+layout in a disposable profile, including action refreshes in the 272-pixel
+viewport left by a narrow deck's scrollbar. On 2026-10-25, installed Writer
+0.8.0 lookup, meaning/example changes, Favorites saving and reopening, and
+light/dark rendering were checked on macOS. README media records that session.
 
 Real Word installation and editing acceptance remain pending on the user's
 other Mac. The reported protected-folder error prompted the scoped helper and

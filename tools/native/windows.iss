@@ -1,5 +1,5 @@
 #define AppName "LOD pane Word"
-#define AppVersion "0.7.0"
+#define AppVersion "0.8.0"
 #define AppExe "LOD-pane-Word.exe"
 
 [Setup]

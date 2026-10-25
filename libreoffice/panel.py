@@ -13,6 +13,7 @@ import unohelper
 from com.sun.star.awt import XActionListener, XCallback, XKeyListener, XTextListener, XWindowListener
 from com.sun.star.awt.Key import ESCAPE, RETURN
 from com.sun.star.lang import XComponent
+from com.sun.star.style.VerticalAlignment import MIDDLE
 from com.sun.star.ui import XSidebarPanel, XToolPanel, XUIElement, XUIElementFactory
 from com.sun.star.view import XSelectionChangeListener
 
@@ -20,7 +21,7 @@ import lodpane
 
 FACTORY = "org.lodpane.PanelFactory"
 URL = "private:resource/toolpanel/LODPane/Notebook"
-VERSION = "v0.7.0"
+VERSION = "v0.8.0"
 WORKERS = ThreadPoolExecutor(max_workers=2)
 LANGUAGE_LABELS = {"en": "English", "fr": "Français", "de": "Deutsch"}
 DESTINATIONS = ("Study", "Favorites")
@@ -28,6 +29,7 @@ ROWS = 10
 SENSE_ROWS = 5
 GAP = 6          # one spacing unit for the whole column
 ROW = 24         # one control height
+SECTION = 18     # separate reading, examples and learning actions
 MAX_WIDTH = 380  # the column never grows past this, however wide the deck is
 MUTED = ("pos", "hint", "status", "context_text", "grammar", "version", "page", "example_label", "language_label", "sense_page")
 
@@ -92,13 +94,13 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         self._action("home", "Home", center=True)
         self._action("library", "Saved 0", center=True)
         self._action("settings", "Settings", center=True)
-        self._field("query", height=ROW, font=9)
+        self._field("query", height=30, font=10)
         self.assign("query", "HelpText", "Search Luxembourgish. Press Enter to look up.")
-        self._action("search", "Look up", center=True)
+        self._action("search", "Look up", height=30, center=True)
         self._action("theme", "Use dark theme")
         self._text("version", VERSION)
         self._text("status", "", font=9)
-        self._text("word", "", height=30, font=16)
+        self._text("word", "", height=40, font=22)
         self.assign("word", "FontName", "Georgia")
         self._text("pos", "", font=9)
         self._text("language_label", "Meaning in", font=8)
@@ -110,7 +112,8 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         self._action("sense_previous", "Previous", center=True)
         self._text("sense_page", "")
         self._action("sense_next", "Next", center=True)
-        self._text("meaning", "", height=34, font=12)
+        self._text("meaning", "", height=34, font=15)
+        self.assign("meaning", "FontWeight", 150.0)
         self._text("grammar", "", font=9)
         self._text("example_label", "Example · Luxembourgish", font=8)
         self._text("example", "", font=10)
@@ -132,9 +135,10 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         self._action("next", "Next", center=True)
         for destination in DESTINATIONS:
             self._choice("dest_" + destination.lower(), destination, center=True)
-        model = self._create("Button", "Button", "save", 32)
+        model = self._create("Button", "Button", "save", 36)
         model.Label = "Save to Study"
         model.FontHeight = 9.0
+        self.assign_raw(model, "FontWeight", 150.0)
         model.Tabstop = True
         self.controls["save"].addActionListener(self)
         self.kinds["save"] = "button"
@@ -176,6 +180,7 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         model = self._create("FixedText", "FixedText", name, height)
         model.Label = label
         model.MultiLine = True
+        self.assign_raw(model, "VerticalAlign", MIDDLE)
         model.FontHeight = float(font)
         self.kinds[name] = "text"
         return model
@@ -188,6 +193,7 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         model.MultiLine = True
         model.Align = 1 if center else 0
         model.Tabstop = True
+        self.assign_raw(model, "VerticalAlign", MIDDLE)
         self.controls[name].addActionListener(self)
         self.controls[name].addKeyListener(self)
         self.kinds[name] = "action"
@@ -256,9 +262,9 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
     def palette(self):
         dark = self.settings["theme"] == "dark"
         if dark:
-            bg, fg, muted, accent, on_accent, wash, field = 0x111D2E, 0xE4EEF4, 0x9FB6C6, 0x55B5CF, 0x06212B, 0x1B2F47, 0x0B1624
+            bg, fg, muted, accent, on_accent, wash, field = 0x111D2E, 0xE4EEF4, 0xAEC5D5, 0x55B5CF, 0x06212B, 0x192D44, 0x111D2E
         else:
-            bg, fg, muted, accent, on_accent, wash, field = 0xFFFFFF, 0x18323F, 0x5E7685, 0x147F9C, 0xFFFFFF, 0xEEF4F7, 0xFFFFFF
+            bg, fg, muted, accent, on_accent, wash, field = 0xFFFFFF, 0x18323F, 0x526B79, 0x147F9C, 0xFFFFFF, 0xF0F6F8, 0xFFFFFF
         return {"bg": bg, "fg": fg, "muted": muted, "accent": accent, "on_accent": on_accent, "wash": wash, "field": field}
 
     def paint(self):
@@ -275,6 +281,12 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
                 self.assign_raw(model, "BackgroundColor", -1)  # transparent: inherits the surface
                 self.assign_raw(model, "TextColor", p["muted"] if name in MUTED else p["fg"])
             elif kind == "field":
+                # The macOS native edit peer can otherwise keep the host's dark
+                # fill even when the pane has explicitly selected a light theme.
+                peer = self.controls[name].getPeer()
+                if peer is not None:
+                    peer.setProperty("NativeWidgetLook", False)
+                self.assign_raw(model, "BorderColor", 0x2B4055 if self.settings["theme"] == "dark" else 0xD6E2E8)
                 self.assign_raw(model, "BackgroundColor", p["field"])
                 self.assign_raw(model, "TextColor", p["fg"])
             elif kind == "choice":
@@ -283,8 +295,8 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
                 self.assign_raw(model, "TextColor", p["on_accent"] if selected else p["fg"])
                 self.assign_raw(model, "State", 1 if selected else 0)
             else:
-                self.assign_raw(model, "BackgroundColor", p["accent"] if kind == "button" else p["wash"])
-                self.assign_raw(model, "TextColor", p["on_accent"] if kind == "button" else p["fg"])
+                self.assign_raw(model, "BackgroundColor", p["accent"] if kind == "button" else p["bg"])
+                self.assign_raw(model, "TextColor", p["on_accent"] if kind == "button" else p["accent"] if name == "source" else p["fg"])
             self.assign_raw(model, "Enabled", name not in self.disabled)
 
     def model_container(self):
@@ -307,7 +319,7 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
             self.label("library", "Back" if self.library_open else "Saved %d" % len(self.words))
             self.label("settings", "Close settings" if self.settings_open else "Settings")
             self.label("theme", "Use light theme" if self.settings["theme"] == "dark" else "Use dark theme")
-            self.label("replace_toggle", "Cancel replacement" if self.replace_open else "Replace selected text…")
+            self.label("replace_toggle", "−  Replace selected text" if self.replace_open else "+  Replace selected text")
             if self.replace_target and self.replace_target["original"] != self.replace_target["replacement"]:
                 self.disabled.discard("replace_confirm")
             else:
@@ -333,7 +345,8 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
                     self.label(name, ("✓ " if active else "") + "%d. %s" % (number, item["translations"].get(language) or "No translation"))
                 saved = self.saved_word() or {}
                 changed = value["note"] != saved.get("note", "")
-                self.label("note_toggle", "My note · unsaved" if changed else "My note" if value["note"] else "Add a note")
+                note_label = "My note · unsaved" if changed else "My note" if value["note"] else "Add a note"
+                self.label("note_toggle", ("−  " if value["note_open"] or value["note"] else "+  ") + note_label)
                 self.label("context", "Remove document excerpt" if value["context"] else "Keep document excerpt")
                 self.update_save_button()
         finally:
@@ -405,7 +418,7 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
     def window_size(self):
         try:
             size = self.Window.getPosSize()
-            return max(288, size.Width), max(0, size.Height)
+            return size.Width, max(0, size.Height)
         except Exception:
             return 336, 0
 
@@ -422,7 +435,9 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
 
     def layout(self, width):
         """Place controls for the current state. Returns the natural content height."""
-        width = max(288, width)
+        # The deck's minimum includes its scrollbar. Lay out inside the actual
+        # remaining width so the rightmost controls do not sit under that bar.
+        width = max(240, width)
         content = min(MAX_WIDTH, width - 2 * GAP - 16)
         left = max(GAP + 10, (width - content) // 2)
         right = left + content
@@ -434,9 +449,9 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         self._place("library", right - 160, y, 68, ROW)
         self._place("settings", right - 88, y, 88, ROW)
         y += ROW + GAP
-        self._place("query", left, y, content - 58 - GAP, ROW)
-        self._place("search", right - 58, y, 58, ROW)
-        y += ROW + 16
+        self._place("query", left, y, content - 72 - GAP, 30)
+        self._place("search", right - 72, y, 72, 30)
+        y += 30 + SECTION
         if self.settings_open:
             y = self._flow("theme", left, y, content - 70, ROW)
             self._place("version", right - 64, y - ROW - GAP, 64, ROW)
@@ -506,7 +521,7 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
             labels = self.saved_labels(self.row_items)
         self.label("word", title)
         self.label("pos", hint)
-        y = self._flow("word", left, y, content, 30)
+        y = self._flow("word", left, y, content, 40)
         y = self._flow("pos", left, y, content) + GAP
         if mode == "library":
             self._place("filter", left, y, content, ROW)
@@ -533,20 +548,20 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         entry, sense, value = self.entry, self.sense, self.draft()
         self.label("word", entry["word"])
         self.label("pos", entry["pos"])
-        y = self._flow("word", left, y, content, 32)
+        y = self._flow("word", left, y, content, 40)
         y = self._flow("pos", left, y, content, ROW)
         y = self.layout_languages(left, content, y + GAP)
         self.label("meaning", sense["translations"].get(self.settings["language"]) or "No translation. Try another language or meaning.")
-        y = self._flow("meaning", left, y, content, 28)
+        y = self._flow("meaning", left, y + GAP, content, 34)
         if sense.get("grammar"):
             self.label("grammar", sense["grammar"])
             y = self._flow("grammar", left, y, content)
         if sense.get("example"):
-            y = self._flow("example_label", left, y + GAP, content)
+            y = self._flow("example_label", left, y + SECTION, content)
             self.label("example", sense["example"])
             y = self._flow("example", left, y, content, ROW)
         if len(entry["senses"]) > 1:
-            y = self._flow("meanings", left, y + GAP, content, ROW)
+            y = self._flow("meanings", left, y + SECTION, content, ROW)
             if self.meanings_open:
                 start = self.sense_page * SENSE_ROWS
                 for slot in range(min(SENSE_ROWS, len(entry["senses"]) - start)):
@@ -560,12 +575,12 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
                     self._place("sense_next", left + content - 72, y, 72, ROW)
                     y += ROW + GAP
                 self.paint()
-        y = self._flow("replace_toggle", left, y + GAP, content, ROW)
+        y = self._flow("replace_toggle", left, y + SECTION, content, 30)
         if self.replace_open:
             y = self._flow("replace_preview", left, y, content, ROW)
             y = self._flow("replace_hint", left, y, content)
             y = self._flow("replace_confirm", left, y, content, ROW)
-        y = self._flow("note_toggle", left, y + GAP, content, ROW)
+        y = self._flow("note_toggle", left, y + GAP, content, 30)
         self.rendering = True
         try:
             self.controls["note"].setText(value["note"])
@@ -574,18 +589,18 @@ class Panel(unohelper.Base, XToolPanel, XSidebarPanel, XSelectionChangeListener,
         if value["note_open"] or value["note"]:
             self._place("note", left, y, content, 72)
             y += 72 + GAP
-        y = self._flow("context", left, y, content, ROW)
+        y = self._flow("context", left, y, content, 30)
         if value["context"]:
             self.label("context_text", value["context"])
             y = self._flow("context_text", left, y, content, ROW)
         y = self._flow("source", left, y + GAP, content, ROW)
-        y += GAP
+        y += SECTION
         half = (content - GAP) // 2
         for index, destination in enumerate(DESTINATIONS):
             self._place("dest_" + destination.lower(), left + index * (half + GAP), y, half, ROW)
         y += ROW + GAP
-        self._place("save", left, y, content, 32)
-        y += 32 + GAP
+        self._place("save", left, y, content, 36)
+        y += 36 + GAP
         self.label("hint", "Unsaved changes" if self.saved_word() and "save" not in self.disabled else "Saving vocabulary does not edit the document.")
         y = self._flow("hint", left, y, content)
         if self.saved_word() is not None:

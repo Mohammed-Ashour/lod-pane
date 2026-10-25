@@ -87,7 +87,7 @@ route below.
 3. Remove an older LOD pane installation if one exists.
 4. Add the downloaded `lod-pane.oxt`, or `dist/lod-pane.oxt` from a source build.
 5. Quit LibreOffice completely, reopen Writer, then choose **View > Sidebar > LOD pane**.
-6. Open Settings and confirm the extension reports `v0.7.0`.
+6. Open Settings and confirm the extension reports `v0.8.0`.
 
 Do not lower macro security or enable a UNO network listener. The sidebar is a
 registered extension, not a document macro.
@@ -311,7 +311,7 @@ acceptance.
 | macOS setup reports Operation not permitted for Word's `Documents/wef` folder | Install a current PKG and grant the Word folder through its native picker. Older builds attempted direct access and could be blocked by macOS app-data protection. |
 | Word add-in is missing | Restart Word and verify the manifest location or catalog. |
 | Writer sidebar is blank | Reinstall the extension, fully restart LibreOffice, and inspect `panel-error.log` in the data folder. |
-| Writer shows an old layout | Remove the cached extension and confirm `v0.7.0` in Settings. |
+| Writer shows an old layout | Remove the cached extension and confirm `v0.8.0` in Settings. |
 | LOD lookup fails | Check internet access, retry, or open Saved to use a saved entry. |
 | HTTPS certificate error | Use the approved CA bundle through `SSL_CERT_FILE`; do not disable verification. |
 | Replacement is rejected | Select one word in an editable document and reopen the preview. |

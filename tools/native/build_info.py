@@ -7,7 +7,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
-MARKETING_VERSION = "0.7.0"
+MARKETING_VERSION = "0.8.0"
 
 
 def main():

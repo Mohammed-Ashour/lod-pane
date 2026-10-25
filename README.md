@@ -90,7 +90,7 @@ No server, certificate setup, Python, or Node.js installation is needed.
 You can also download `lod-pane.oxt` and add it through **Tools > Extensions**.
 To build from source instead, run `python3 tools/build.py`.
 
-<img src="docs/media/libreoffice-install.png" width="588" alt="LibreOffice Extension Manager showing LOD pane 0.7.0 enabled">
+<img src="docs/media/libreoffice-install.png" width="588" alt="LibreOffice Extension Manager showing LOD pane 0.8.0 enabled">
 
 ### Microsoft Word
 
