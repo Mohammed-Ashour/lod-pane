@@ -126,6 +126,21 @@ Word uses `wef` to discover locally registered add-ins. Setup creates it if
 needed and writes `lod-pane.xml` there. If Word's internal **Documents** folder
 does not exist, open Word once, quit it, and retry setup.
 
+Windows setup handles add-in registration automatically. To inspect the installed
+files, press **Win+E**, paste one of these paths into File Explorer's address
+bar, and press **Enter**:
+
+| Windows path | Contents |
+| --- | --- |
+| `%LOCALAPPDATA%\Programs\LOD pane Word\` | Installed app, including `LOD-pane-Word.exe` |
+| `%LOCALAPPDATA%\LOD pane\word-companion\` | Setup state, `word-manifest.xml`, certificates and `companion.log` |
+| `%LOCALAPPDATA%\LOD pane\` | Local vocabulary and preferences |
+
+For example, `%LOCALAPPDATA%` usually expands to
+`C:\Users\alex\AppData\Local` for an account named `alex`. The macOS folder
+picker steps above apply only to macOS; Windows does not ask you to select a
+`wef` folder.
+
 Setup registers the development manifest and runs the local HTTPS companion in
 the background, including at future sign-ins. Restart Word and open
 **Home > Add-ins > LOD pane**. Open the installed app to start, stop, or uninstall
