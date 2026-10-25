@@ -1,5 +1,4 @@
 """Check native certificate and registration boundaries without modifying OS settings."""
-import importlib.util
 from pathlib import Path
 import sys
 from tempfile import TemporaryDirectory

@@ -33,10 +33,6 @@ jobs:
         with:
           python-version: "3.13"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Build packages
         run: |
           python tools/build.py
@@ -79,10 +75,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
 
       - name: Build packages
         run: |

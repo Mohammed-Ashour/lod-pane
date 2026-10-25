@@ -4,7 +4,6 @@ Run: python tests/test_word_install.py
 No Word profile, login startup, registry or certificate trust is changed.
 """
 import importlib.util
-import os
 from pathlib import Path
 import plistlib
 import subprocess

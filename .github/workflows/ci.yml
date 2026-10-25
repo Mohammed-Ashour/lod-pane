@@ -48,8 +48,6 @@ jobs:
         run: |
           node --check word/app.js
           node --check tests/word-runtime.cjs
-          node --check tests/prototypes.cjs
-          node --check tests/learner-prototypes.cjs
           node --check tests/readme-media.cjs
 
       - name: Run core, HTTP, and package tests
@@ -80,10 +78,7 @@ jobs:
       - name: Run browser checks
         env:
           PLAYWRIGHT_CHANNEL: chromium
-        run: |
-          node tests/word-runtime.cjs
-          node tests/prototypes.cjs
-          node tests/learner-prototypes.cjs
+        run: node tests/word-runtime.cjs
 
       - name: Validate Word manifest
         run: npx --yes office-addin-manifest@3.0.1 validate dist/word-manifest.xml

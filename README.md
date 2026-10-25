@@ -124,7 +124,6 @@ word/                  Word task pane: HTML, CSS, Office.js
 libreoffice/panel.py   native LibreOffice Writer sidebar
 tools/                 package build and host setup helpers
 tests/                 fixture-backed runtime and package checks
-docs/agdr/             architecture decision records
 ```
 
 The shared dictionary/server core uses only the Python standard library. Native
@@ -165,6 +164,3 @@ JavaScript boundary. They do not prove that the add-in works in real Word.
 
 - [Setup and host installation](SETUP.md)
 - [Architecture](ARCHITECTURE.md)
-- [Decision records](docs/agdr/)
-- [Original prototype gallery](prototypes.html)
-- [Learner prototype gallery](learner-prototypes.html)

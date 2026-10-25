@@ -1,7 +1,6 @@
 """Check native LibreOffice setup without opening UI or changing a user profile."""
 import importlib.util
 from pathlib import Path
-import sys
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 from zipfile import ZipFile
