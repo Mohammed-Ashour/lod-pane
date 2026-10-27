@@ -12,6 +12,25 @@ private func wordDocumentsURL(home: URL = FileManager.default.homeDirectoryForCu
     home.appendingPathComponent("Library/Containers/com.microsoft.Word/Data/Documents", isDirectory: true)
 }
 
+private func pickerDirectory(for target: URL) -> URL {
+    var directory = target
+    while directory.path != "/" {
+        do {
+            let values = try directory.resourceValues(forKeys: [.isDirectoryKey])
+            if values.isDirectory == true { return directory }
+        } catch let error as NSError {
+            // Let the system picker try protected paths itself. Only fall back
+            // when the directory is missing, not when access is denied.
+            if error.domain != NSCocoaErrorDomain ||
+                (error.code != NSFileReadNoSuchFileError && error.code != NSFileNoSuchFileError) {
+                return directory
+            }
+        }
+        directory.deleteLastPathComponent()
+    }
+    return directory
+}
+
 private func allowedFolder(_ selected: URL, documents: URL) -> URL? {
     let selectedPath = canonical(selected).path
     let documentsPath = canonical(documents).path
@@ -193,6 +212,10 @@ private func runSelfTest() throws {
     defer { try? FileManager.default.removeItem(at: temporary) }
     let documents = temporary.appendingPathComponent("Documents", isDirectory: true)
     try FileManager.default.createDirectory(at: documents, withIntermediateDirectories: true)
+    guard pickerDirectory(for: documents).path == documents.path,
+          pickerDirectory(for: documents.appendingPathComponent("missing/wef", isDirectory: true)).path == documents.path else {
+        throw AccessError.invalidSelection
+    }
     let selected = try FolderSession(selectedFolder: documents, documentsFolder: documents)
     let outside = temporary.appendingPathComponent("Other", isDirectory: true)
     guard allowedFolder(outside, documents: documents) == nil else { throw AccessError.invalidSelection }
@@ -222,7 +245,7 @@ private func runSelfTest() throws {
           try Data(contentsOf: otherFile) == Data("keep".utf8) else { throw AccessError.invalidData }
     _ = try second.remove(original.base64EncodedString())
     guard try second.currentData() == nil else { throw AccessError.invalidData }
-    print("PASS: folder allowlist, snapshot/write/remove/restore, conflict protection, and unrelated-file preservation.")
+    print("PASS: picker starting directory, folder allowlist, snapshot/write/remove/restore, conflict protection, and unrelated-file preservation.")
 }
 
 private func runPickerSession() -> Int32 {
@@ -233,13 +256,14 @@ private func runPickerSession() -> Int32 {
     let documents = wordDocumentsURL()
     let panel = NSOpenPanel()
     panel.title = "Allow LOD pane to register in Word"
-    panel.message = "Choose Word's Documents folder, or its existing wef folder. LOD pane only reads and writes wef/lod-pane.xml."
+    panel.message = "Choose Word's Documents folder, or its existing wef folder. LOD pane only reads and writes wef/lod-pane.xml.\n\nFolder: \(documents.path)\nIf needed, press Command-Shift-G and enter this path."
     panel.prompt = "Allow Access"
     panel.canChooseFiles = false
     panel.canChooseDirectories = true
     panel.allowsMultipleSelection = false
     panel.canCreateDirectories = true
-    panel.directoryURL = documents
+    panel.showsHiddenFiles = true
+    panel.directoryURL = pickerDirectory(for: documents)
 
     guard panel.runModal() == .OK, let selected = panel.url else {
         jsonLine(["ok": false, "error": "Word folder access cancelled."])
